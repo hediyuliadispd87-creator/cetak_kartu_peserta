@@ -1,0 +1,1128 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Generator Kartu Peserta</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --navy:    #0f2340;
+  --navy2:   #1a3658;
+  --navy3:   #234778;
+  --gold:    #f5c842;
+  --gold2:   #e8b830;
+  --teal:    #0ea5a0;
+  --green:   #22c55e;
+  --red:     #ef4444;
+  --purple:  #8b5cf6;
+  --text:    #e2e8f0;
+  --muted:   #94a3b8;
+  --border:  rgba(255,255,255,0.08);
+  --surface: rgba(255,255,255,0.05);
+  --radius:  8px;
+}
+
+body {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  background: #0a1929;
+  color: var(--text);
+  min-height: 100vh;
+}
+
+/* ─── TOP HEADER ─── */
+#app-header {
+  background: linear-gradient(135deg, var(--navy) 0%, var(--navy2) 100%);
+  border-bottom: 1px solid rgba(245,200,66,0.2);
+  padding: 0 24px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 20px rgba(0,0,0,0.4);
+}
+#app-header .app-logo {
+  width: 32px; height: 32px;
+  background: var(--gold);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+#app-header h1 {
+  font-size: 15px;
+  font-weight: 700;
+  color: white;
+  letter-spacing: -0.3px;
+}
+#app-header .header-sep {
+  width: 1px; height: 20px;
+  background: var(--border);
+  margin: 0 4px;
+}
+#status-bar {
+  font-size: 12px;
+  color: var(--muted);
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#status-bar.ok   { color: #4ade80; }
+#status-bar.warn { color: var(--gold); }
+#status-bar.err  { color: #f87171; }
+
+/* ─── TOOLBAR ─── */
+#toolbar {
+  background: var(--navy2);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 24px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+/* File upload pill */
+.upload-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0 12px 0 6px;
+  height: 34px;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+}
+.upload-pill:hover { border-color: rgba(255,255,255,0.2); background: rgba(255,255,255,0.08); }
+.upload-pill .pill-icon {
+  width: 22px; height: 22px;
+  background: rgba(245,200,66,0.15);
+  border-radius: 4px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+.upload-pill span { font-size: 12px; color: var(--text); font-weight: 500; white-space: nowrap; }
+
+/* Sheet select */
+#sheetSelect {
+  height: 34px;
+  padding: 0 10px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.2s;
+  min-width: 120px;
+}
+#sheetSelect:focus { border-color: var(--gold); }
+#sheetSelect option { background: #1a3658; }
+
+/* Toolbar separator */
+.tb-sep { width: 1px; height: 20px; background: var(--border); flex-shrink: 0; }
+
+/* Buttons */
+.tb-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 34px;
+  padding: 0 14px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+  outline: none;
+}
+.tb-btn svg { width: 14px; height: 14px; flex-shrink: 0; }
+
+.btn-gold   { background: var(--gold); color: var(--navy); border-color: var(--gold); }
+.btn-gold:hover { background: var(--gold2); border-color: var(--gold2); }
+
+.btn-outline { background: transparent; color: var(--text); border-color: var(--border); }
+.btn-outline:hover { background: var(--surface); border-color: rgba(255,255,255,0.2); }
+
+.btn-teal  { background: rgba(14,165,160,0.15); color: #2dd4bf; border-color: rgba(14,165,160,0.3); }
+.btn-teal:hover { background: rgba(14,165,160,0.25); border-color: var(--teal); }
+
+.btn-green { background: rgba(34,197,94,0.12); color: #4ade80; border-color: rgba(34,197,94,0.25); }
+.btn-green:hover { background: rgba(34,197,94,0.22); border-color: var(--green); }
+
+.btn-purple { background: rgba(139,92,246,0.12); color: #a78bfa; border-color: rgba(139,92,246,0.25); }
+.btn-purple:hover { background: rgba(139,92,246,0.22); border-color: var(--purple); }
+
+.btn-red { background: rgba(239,68,68,0.1); color: #f87171; border-color: rgba(239,68,68,0.2); }
+.btn-red:hover { background: rgba(239,68,68,0.2); border-color: var(--red); }
+
+.btn-ghost-gold {
+  background: rgba(245,200,66,0.08);
+  color: var(--gold);
+  border-color: rgba(245,200,66,0.25);
+}
+.btn-ghost-gold:hover, .btn-ghost-gold.active {
+  background: rgba(245,200,66,0.18);
+  border-color: var(--gold);
+}
+
+/* Logo upload row */
+#logo-row {
+  background: rgba(255,255,255,0.02);
+  border-bottom: 1px solid var(--border);
+  padding: 8px 24px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+.logo-slot {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 5px 10px;
+  transition: border-color 0.2s;
+}
+.logo-slot:hover { border-color: rgba(255,255,255,0.18); }
+.logo-slot-label { font-size: 11px; color: var(--muted); white-space: nowrap; }
+.logo-thumb {
+  width: 24px; height: 24px;
+  border-radius: 4px;
+  object-fit: contain;
+  display: none;
+  border: 1px solid rgba(245,200,66,0.4);
+  background: white;
+}
+.logo-upload-btn {
+  height: 24px;
+  padding: 0 10px;
+  border-radius: 4px;
+  border: 1px dashed rgba(255,255,255,0.2);
+  background: transparent;
+  color: var(--muted);
+  font-family: inherit;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.logo-upload-btn:hover { border-color: var(--gold); color: var(--gold); }
+.logo-clear {
+  background: transparent;
+  border: none;
+  color: #f87171;
+  font-size: 13px;
+  cursor: pointer;
+  display: none;
+  line-height: 1;
+  padding: 2px;
+  opacity: 0.7;
+  transition: opacity 0.15s;
+}
+.logo-clear:hover { opacity: 1; }
+
+/* ─── EDIT PANEL (accordion) ─── */
+#edit-panel {
+  background: var(--navy);
+  border-bottom: 1px solid var(--border);
+  overflow: hidden;
+  max-height: 0;
+  transition: max-height 0.4s cubic-bezier(0.4,0,0.2,1);
+}
+#edit-panel.open { max-height: 800px; }
+
+.edit-inner {
+  padding: 20px 24px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.edit-section { }
+.edit-section-title {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: var(--gold);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.edit-section-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: rgba(245,200,66,0.12);
+}
+
+.edit-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 10px 16px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.field label {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--muted);
+}
+.field input {
+  height: 32px;
+  padding: 0 10px;
+  border-radius: 5px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.05);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 12px;
+  transition: border-color 0.15s, background 0.15s;
+  outline: none;
+}
+.field input:focus {
+  border-color: var(--gold);
+  background: rgba(255,255,255,0.08);
+}
+.field input::placeholder { color: rgba(255,255,255,0.2); }
+
+/* Background controls */
+.bg-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.bg-mode-group {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+.bg-mode-btn {
+  height: 28px;
+  padding: 0 12px;
+  border-radius: 5px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--muted);
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.bg-mode-btn:hover { color: var(--text); border-color: rgba(255,255,255,0.2); }
+.bg-mode-btn.active { background: rgba(245,200,66,0.12); border-color: rgba(245,200,66,0.35); color: var(--gold); font-weight: 700; }
+
+.bg-control { display: none; align-items: center; gap: 10px; flex-wrap: wrap; }
+.bg-control.show { display: flex; }
+
+.color-swatch { width: 32px; height: 28px; border-radius: 5px; border: 1px solid var(--border); padding: 2px; background: transparent; cursor: pointer; }
+
+.range-group { display: flex; align-items: center; gap: 6px; }
+.range-group label { font-size: 11px; color: var(--muted); }
+.range-group input[type=range] { width: 90px; accent-color: var(--gold); cursor: pointer; }
+.range-val { font-size: 11px; font-weight: 700; color: var(--gold); min-width: 34px; }
+
+.bg-size-sel {
+  height: 28px;
+  padding: 0 8px;
+  border-radius: 5px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 11px;
+  cursor: pointer;
+  outline: none;
+}
+.bg-size-sel option { background: #1a3658; }
+
+.bg-img-preview {
+  width: 40px; height: 28px;
+  object-fit: cover;
+  border-radius: 4px;
+  border: 1px solid rgba(245,200,66,0.3);
+  display: none;
+}
+
+.btn-sm-danger {
+  height: 26px;
+  padding: 0 10px;
+  border-radius: 4px;
+  border: 1px solid rgba(239,68,68,0.25);
+  background: rgba(239,68,68,0.08);
+  color: #f87171;
+  font-family: inherit;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.btn-sm-danger:hover { background: rgba(239,68,68,0.18); border-color: var(--red); }
+
+/* Edit panel footer */
+.edit-footer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+.applied-badge {
+  display: none;
+  font-size: 10px;
+  font-weight: 700;
+  background: rgba(34,197,94,0.15);
+  color: #4ade80;
+  border: 1px solid rgba(34,197,94,0.25);
+  border-radius: 20px;
+  padding: 3px 10px;
+}
+.edit-hint { font-size: 11px; color: rgba(255,255,255,0.25); font-style: italic; }
+
+/* ─── PREVIEW AREA ─── */
+#preview-area {
+  padding: 24px;
+  background: #0d1f35;
+  min-height: calc(100vh - 56px);
+}
+
+/* ─── PLACEHOLDER ─── */
+#placeholder {
+  max-width: 600px;
+  margin: 40px auto;
+  text-align: center;
+}
+#placeholder .ph-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+#placeholder h2 {
+  font-size: 22px;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 8px;
+}
+#placeholder .ph-sub {
+  font-size: 14px;
+  color: var(--muted);
+  margin-bottom: 28px;
+}
+.steps-card {
+  background: var(--navy2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px 24px;
+  text-align: left;
+}
+.step-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+}
+.step-item:last-child { border-bottom: none; }
+.step-num {
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  background: rgba(245,200,66,0.12);
+  border: 1px solid rgba(245,200,66,0.25);
+  color: var(--gold);
+  font-size: 11px;
+  font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.step-text { font-size: 13px; color: var(--text); line-height: 1.6; }
+.step-text strong { color: white; }
+.step-text em { color: var(--muted); font-style: normal; }
+.ph-code {
+  margin-top: 16px;
+  background: rgba(0,0,0,0.3);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 10px 14px;
+  font-size: 12px;
+  font-family: 'Courier New', monospace;
+  color: #7dd3fc;
+  text-align: center;
+}
+
+/* ─── A4 PAGE ─── */
+.page-a4 {
+  width: 210mm;
+  min-height: 297mm;
+  background: white;
+  margin: 0 auto 20px auto;
+  padding: 8mm;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: repeat(4, 1fr);
+  gap: 4mm;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+  border-radius: 2px;
+}
+
+/* ─── KARTU PESERTA ─── */
+.kartu {
+  border: 2px solid #000;
+  padding: 0;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 66mm;
+}
+.kartu-bg {
+  position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+  z-index: 0;
+  background-size: cover; background-position: center; background-repeat: no-repeat;
+}
+.kartu-watermark {
+  position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+  display: flex; flex-direction: column; justify-content: center;
+  overflow: hidden; pointer-events: none; z-index: 0;
+}
+.kartu-watermark span {
+  color: rgba(0,128,0,0.15); font-size: 8.5px; font-weight: bold;
+  white-space: nowrap; line-height: 1.6; letter-spacing: 0.5px;
+}
+.kartu-header {
+  display: flex; align-items: center; padding: 3mm 3mm 2mm 3mm;
+  border-bottom: 1.5px solid #000; background: white;
+  position: relative; z-index: 1; gap: 6px;
+}
+.logo-placeholder {
+  width: 28px; height: 28px; border: 1px solid #ccc; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 6px; color: #888; text-align: center; flex-shrink: 0;
+  font-family: 'Times New Roman', serif;
+}
+.header-text { flex: 1; text-align: center; line-height: 1.3; font-family: 'Times New Roman', serif; }
+.title-asat   { font-size: 7px; font-weight: bold; text-transform: uppercase; }
+.title-sekolah{ font-size: 7.5px; font-weight: bold; text-transform: uppercase; }
+.title-tahun  { font-size: 7px; font-weight: bold; }
+.kartu-judul {
+  text-align: center; padding: 2mm 0 1mm 0;
+  position: relative; z-index: 1; font-family: 'Times New Roman', serif;
+}
+.kartu-judul span { font-size: 11px; font-weight: bold; text-decoration: underline; letter-spacing: 1px; }
+.kartu-ruang-row {
+  display: flex; justify-content: flex-end; padding: 0 3mm 1mm 3mm;
+  position: relative; z-index: 1;
+}
+.ruang-box {
+  border: 1.5px solid #000; padding: 2px 8px; font-size: 8px; font-weight: bold;
+  background: white; min-width: 50px; text-align: center; font-family: 'Times New Roman', serif;
+}
+.ruang-label { font-size: 8px; font-weight: bold; margin-right: 4px; line-height: 22px; font-family: 'Times New Roman', serif; }
+.kartu-data { padding: 1mm 3mm; flex: 1; position: relative; z-index: 1; }
+.data-row { display: flex; align-items: baseline; margin-bottom: 1.5mm; font-size: 8px; font-family: 'Times New Roman', serif; }
+.data-label { width: 26mm; font-weight: normal; flex-shrink: 0; }
+.data-colon { width: 4mm; flex-shrink: 0; text-align: center; }
+.data-value { flex: 1; font-weight: normal; border-bottom: 0.5px solid #555; min-height: 10px; padding-bottom: 1px; }
+.kartu-footer {
+  padding: 1mm 3mm 2mm 3mm; position: relative; z-index: 1;
+  display: flex; justify-content: flex-end; flex-direction: column; align-items: flex-end;
+}
+.ttd-area { text-align: center; font-size: 7.5px; font-family: 'Times New Roman', serif; }
+.ttd-tanggal { font-size: 7.5px; margin-bottom: 1mm; }
+.ttd-nama { font-size: 8px; font-weight: bold; text-decoration: underline; margin-top: 8mm; }
+.ttd-nip  { font-size: 7.5px; font-weight: bold; }
+
+/* ─── PRINT ─── */
+@media print {
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  #app-header, #toolbar, #logo-row, #edit-panel { display: none !important; }
+  body { background: white; }
+  #preview-area { padding: 0; background: white; }
+  .page-a4 { margin: 0; box-shadow: none; page-break-after: always; width: 210mm; min-height: 297mm; border-radius: 0; }
+  #placeholder { display: none !important; }
+}
+</style>
+</head>
+<body>
+
+<!-- ─── HEADER ─── -->
+<div id="app-header">
+  <div class="app-logo">🎓</div>
+  <h1>Generator Kartu Peserta</h1>
+  <div class="header-sep"></div>
+  <div id="status-bar">Siap — upload spreadsheet untuk mulai.</div>
+</div>
+
+<!-- ─── TOOLBAR ─── -->
+<div id="toolbar">
+
+  <!-- Upload file -->
+  <label class="upload-pill" for="fileInput" title="Upload .xlsx atau .csv">
+    <div class="pill-icon">📂</div>
+    <span id="fileLabel">Upload Spreadsheet</span>
+  </label>
+  <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" style="display:none">
+
+  <!-- Sheet select -->
+  <select id="sheetSelect" title="Pilih sheet">
+    <option value="">— pilih sheet —</option>
+  </select>
+
+  <!-- Load buttons -->
+  <button class="tb-btn btn-gold" onclick="loadSheet()">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><polygon points="4,2 14,8 4,14"/></svg>
+    Load Sheet
+  </button>
+  <button class="tb-btn btn-outline" onclick="loadAllSheets()">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="12" height="2" rx="1"/><rect x="2" y="7" width="12" height="2" rx="1"/><rect x="2" y="11" width="12" height="2" rx="1"/></svg>
+    Semua Kelas
+  </button>
+
+  <div class="tb-sep"></div>
+
+  <!-- Template download -->
+  <button class="tb-btn btn-purple" onclick="downloadTemplate()">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 2v8M5 8l3 3 3-3M3 13h10"/></svg>
+    Unduh Templat
+  </button>
+
+  <!-- Print -->
+  <button class="tb-btn btn-green" onclick="window.print()">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6V2h8v4M4 11H3a1 1 0 01-1-1V7a1 1 0 011-1h10a1 1 0 011 1v3a1 1 0 01-1 1h-1M4 11v3h8v-3H4z"/></svg>
+    Cetak
+  </button>
+
+  <!-- Clear -->
+  <button class="tb-btn btn-red" onclick="clearAll()">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="3" x2="13" y2="13"/><line x1="13" y1="3" x2="3" y2="13"/></svg>
+    Clear
+  </button>
+
+  <div class="tb-sep"></div>
+
+  <!-- Edit toggle -->
+  <button class="tb-btn btn-ghost-gold" id="editToggleBtn" onclick="toggleEditPanel()">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 2l3 3-8 8H3v-3l8-8z"/></svg>
+    Edit Kop &amp; TTD
+    <svg id="chevron" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" style="margin-left:2px;transition:transform 0.3s"><polyline points="4,6 8,10 12,6"/></svg>
+  </button>
+</div>
+
+<!-- ─── LOGO ROW ─── -->
+<div id="logo-row">
+
+  <div class="logo-slot">
+    <img id="thumbKab" class="logo-thumb" src="" alt="">
+    <span class="logo-slot-label">🏛 Logo Kab</span>
+    <button class="logo-upload-btn" onclick="document.getElementById('logoKabInput').click()">Pilih Gambar</button>
+    <input type="file" id="logoKabInput" accept="image/*" style="display:none" onchange="handleLogoUpload('kab',this)">
+    <button class="logo-clear" id="clearKabBtn" onclick="clearLogo('kab')" title="Hapus">✕</button>
+  </div>
+
+  <div class="logo-slot">
+    <img id="thumbSmp" class="logo-thumb" src="" alt="">
+    <span class="logo-slot-label">🏫 Logo Sekolah</span>
+    <button class="logo-upload-btn" onclick="document.getElementById('logoSmpInput').click()">Pilih Gambar</button>
+    <input type="file" id="logoSmpInput" accept="image/*" style="display:none" onchange="handleLogoUpload('smp',this)">
+    <button class="logo-clear" id="clearSmpBtn" onclick="clearLogo('smp')" title="Hapus">✕</button>
+  </div>
+
+  <span style="font-size:11px;color:var(--muted);font-style:italic;margin-left:4px;">Logo diterapkan otomatis ke semua kartu</span>
+</div>
+
+<!-- ─── EDIT PANEL ─── -->
+<div id="edit-panel">
+  <div class="edit-inner">
+
+    <!-- Kop -->
+    <div class="edit-section">
+      <div class="edit-section-title">Kop / Header Kartu</div>
+      <div class="edit-grid">
+        <div class="field"><label>Baris 1 — Nama Ujian</label><input type="text" id="edit_namaUjian" value="ASESMEN SUMATIF AKHIR TAHUN"></div>
+        <div class="field"><label>Baris 2 — Nama Sekolah (HURUF BESAR)</label><input type="text" id="edit_namaSekolah" value="SMP NEGERI 1 CIKALONGKULON"></div>
+        <div class="field"><label>Baris 3 — Tahun Pelajaran</label><input type="text" id="edit_tahunPelajaran" value="TAHUN PELAJARAN 2025 / 2026"></div>
+        <div class="field"><label>Nama Sekolah di Badan Kartu</label><input type="text" id="edit_namaSekolahBadan" value="SMP Negeri 1 Cikalongkulon"></div>
+        <div class="field"><label>Teks Watermark</label><input type="text" id="edit_watermark" value="ASESMEN SUMATIF AKHIR TAHUN SMP NEGERI 1 CIKALONG KULON"></div>
+      </div>
+    </div>
+
+    <!-- TTD -->
+    <div class="edit-section">
+      <div class="edit-section-title">Tanda Tangan &amp; Titi Mangsa</div>
+      <div class="edit-grid">
+        <div class="field"><label>Tempat</label><input type="text" id="edit_tempatTtd" value="Cikalongkulon"></div>
+        <div class="field"><label>Tanggal</label><input type="text" id="edit_tanggalTtd" value="1 Juni 2026"></div>
+        <div class="field"><label>Jabatan</label><input type="text" id="edit_jabatanKepsek" value="Kepala Sekolah"></div>
+        <div class="field"><label>Nama Kepala Sekolah</label><input type="text" id="edit_namaKepsek" value="Dedi Suhendri, S.Pd., M.M."></div>
+        <div class="field"><label>NIP</label><input type="text" id="edit_nipKepsek" value="19700428200604004"></div>
+      </div>
+    </div>
+
+    <!-- Background -->
+    <div class="edit-section">
+      <div class="edit-section-title">Background Kartu</div>
+      <div class="bg-row">
+
+        <div class="bg-mode-group">
+          <button class="bg-mode-btn active" id="bgTabNone"  onclick="setBgMode('none')">Tanpa BG</button>
+          <button class="bg-mode-btn"        id="bgTabColor" onclick="setBgMode('color')">🎨 Warna</button>
+          <button class="bg-mode-btn"        id="bgTabImage" onclick="setBgMode('image')">🖼 Gambar</button>
+        </div>
+
+        <!-- Color controls -->
+        <div class="bg-control" id="bgColorBlock">
+          <input type="color" id="bgColorPicker" class="color-swatch" value="#e8f4f8" onchange="applyBgColor()">
+          <div class="range-group">
+            <label>Opacity</label>
+            <input type="range" id="bgColorOpacity" min="0" max="100" value="30" step="1" oninput="applyBgColor()">
+            <span class="range-val" id="bgColorOpacityVal">30%</span>
+          </div>
+          <button class="btn-sm-danger" onclick="clearBg()">✕ Hapus</button>
+        </div>
+
+        <!-- Image controls -->
+        <div class="bg-control" id="bgImageBlock">
+          <img id="bgImgThumb" class="bg-img-preview" src="" alt="">
+          <button class="logo-upload-btn" onclick="document.getElementById('bgImgInput').click()">📁 Pilih Gambar</button>
+          <input type="file" id="bgImgInput" accept="image/*" style="display:none" onchange="handleBgImageUpload(this)">
+          <div class="range-group">
+            <label>Opacity</label>
+            <input type="range" id="bgImgOpacity" min="0" max="100" value="20" step="1" oninput="applyBgImage()">
+            <span class="range-val" id="bgImgOpacityVal">20%</span>
+          </div>
+          <select class="bg-size-sel" id="bgSizeSelect" onchange="applyBgImage()">
+            <option value="cover">Cover</option>
+            <option value="contain">Contain</option>
+            <option value="100% 100%">Stretch</option>
+            <option value="repeat">Repeat</option>
+          </select>
+          <button class="btn-sm-danger" onclick="clearBg()">✕ Hapus</button>
+        </div>
+
+      </div>
+      <div style="font-size:11px;color:rgba(255,255,255,0.25);margin-top:8px;font-style:italic;">Gunakan opacity rendah (10–30%) agar teks tetap terbaca.</div>
+    </div>
+
+    <!-- Actions -->
+    <div class="edit-footer">
+      <button class="tb-btn btn-teal" onclick="applyEdits()">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="2,8 6,12 14,4"/></svg>
+        Terapkan
+      </button>
+      <button class="tb-btn btn-outline" onclick="resetEdits()">↺ Reset Default</button>
+      <span class="applied-badge" id="appliedBadge">✓ Diterapkan!</span>
+      <span class="edit-hint">Perubahan langsung diterapkan ke seluruh kartu.</span>
+    </div>
+
+  </div>
+</div>
+
+<!-- ─── PREVIEW ─── -->
+<div id="preview-area">
+  <div id="placeholder">
+    <div class="ph-icon">📄</div>
+    <h2>Kartu Peserta Ujian</h2>
+    <p class="ph-sub">Upload file Excel atau CSV untuk mulai membuat kartu peserta.</p>
+    <div class="steps-card">
+      <div class="step-item"><div class="step-num">1</div><div class="step-text">Klik <strong>"Upload Spreadsheet"</strong> di toolbar atas, pilih file <strong>.xlsx</strong> atau <strong>.csv</strong></div></div>
+      <div class="step-item"><div class="step-num">2</div><div class="step-text">Pilih sheet lalu klik <strong>"Load Sheet"</strong> — atau <strong>"Semua Kelas"</strong> untuk load sekaligus</div></div>
+      <div class="step-item"><div class="step-num">3</div><div class="step-text">Kartu tersusun otomatis <strong>8 per halaman A4</strong> (2 kolom × 4 baris)</div></div>
+      <div class="step-item"><div class="step-num">4</div><div class="step-text">Klik <strong>"Edit Kop &amp; TTD"</strong> untuk ubah kop, background, atau tanda tangan kepala sekolah</div></div>
+      <div class="step-item"><div class="step-num">5</div><div class="step-text">Klik <strong>"Cetak"</strong> untuk mencetak atau simpan sebagai PDF</div></div>
+    </div>
+    <div class="ph-code">Header: ruang &nbsp;|&nbsp; nama &nbsp;|&nbsp; kelas &nbsp;|&nbsp; nis_nisn &nbsp;|&nbsp; no_peserta</div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+let workbook = null, logoKabSrc = null, logoSmpSrc = null;
+
+let bgState = { mode:'none', color:'#e8f4f8', colorOpacity:30, imageSrc:null, imageOpacity:20, imageSize:'cover' };
+
+const CONFIG_DEFAULTS = {
+  namaUjian:'ASESMEN SUMATIF AKHIR TAHUN', namaSekolah:'SMP NEGERI 1 CIKALONGKULON',
+  tahunPelajaran:'TAHUN PELAJARAN 2025 / 2026', namaSekolahBadan:'SMP Negeri 1 Cikalongkulon',
+  watermark:'ASESMEN SUMATIF AKHIR TAHUN SMP NEGERI 1 CIKALONG KULON',
+  tempatTtd:'Cikalongkulon', tanggalTtd:'1 Juni 2026',
+  jabatanKepsek:'Kepala Sekolah', namaKepsek:'Dedi Suhendri, S.Pd., M.M.',
+  nipKepsek:'Nip. 19700428200604004'
+};
+let config = { ...CONFIG_DEFAULTS };
+
+function setStatus(msg, type='') {
+  const el = document.getElementById('status-bar');
+  el.textContent = msg;
+  el.className = type;
+}
+
+// Edit panel toggle
+function toggleEditPanel() {
+  const panel = document.getElementById('edit-panel');
+  const btn = document.getElementById('editToggleBtn');
+  const chevron = document.getElementById('chevron');
+  const isOpen = panel.classList.toggle('open');
+  btn.classList.toggle('active', isOpen);
+  chevron.style.transform = isOpen ? 'rotate(180deg)' : '';
+}
+
+// Background mode
+function setBgMode(mode) {
+  bgState.mode = mode;
+  ['None','Color','Image'].forEach(m => {
+    document.getElementById('bgTab'+m).classList.toggle('active', m.toLowerCase() === mode);
+  });
+  document.getElementById('bgColorBlock').classList.toggle('show', mode === 'color');
+  document.getElementById('bgImageBlock').classList.toggle('show', mode === 'image');
+  if (mode === 'none') refreshBgInCards();
+}
+
+function applyBgColor() {
+  bgState.color = document.getElementById('bgColorPicker').value;
+  bgState.colorOpacity = parseInt(document.getElementById('bgColorOpacity').value);
+  document.getElementById('bgColorOpacityVal').textContent = bgState.colorOpacity + '%';
+  refreshBgInCards();
+}
+
+function handleBgImageUpload(input) {
+  const file = input.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    bgState.imageSrc = e.target.result;
+    const thumb = document.getElementById('bgImgThumb');
+    thumb.src = e.target.result; thumb.style.display = 'inline-block';
+    applyBgImage();
+    setStatus('✓ Gambar background diupload.','ok');
+  };
+  reader.readAsDataURL(file);
+}
+
+function applyBgImage() {
+  if (!bgState.imageSrc) return;
+  bgState.imageOpacity = parseInt(document.getElementById('bgImgOpacity').value);
+  bgState.imageSize = document.getElementById('bgSizeSelect').value;
+  document.getElementById('bgImgOpacityVal').textContent = bgState.imageOpacity + '%';
+  refreshBgInCards();
+}
+
+function clearBg() {
+  bgState.imageSrc = null;
+  document.getElementById('bgImgInput').value = '';
+  const thumb = document.getElementById('bgImgThumb');
+  thumb.src = ''; thumb.style.display = 'none';
+  setBgMode('none');
+  setStatus('Background dihapus.');
+}
+
+function buildBgStyle() {
+  if (bgState.mode === 'none') return '';
+  if (bgState.mode === 'color') {
+    const h = bgState.color, op = (bgState.colorOpacity/100).toFixed(2);
+    const r = parseInt(h.slice(1,3),16), g = parseInt(h.slice(3,5),16), b = parseInt(h.slice(5,7),16);
+    return `background:rgba(${r},${g},${b},${op});`;
+  }
+  if (bgState.mode === 'image' && bgState.imageSrc) {
+    const op = (bgState.imageOpacity/100).toFixed(2);
+    const sz = bgState.imageSize === 'repeat' ? 'auto' : bgState.imageSize;
+    const rp = bgState.imageSize === 'repeat' ? 'repeat' : 'no-repeat';
+    return `background-image:url(${bgState.imageSrc});background-size:${sz};background-repeat:${rp};background-position:center;opacity:${op};`;
+  }
+  return '';
+}
+
+function refreshBgInCards() {
+  const s = buildBgStyle();
+  document.querySelectorAll('.kartu-bg').forEach(el => { el.style.cssText = s; });
+}
+
+// Apply/reset edits
+function applyEdits() {
+  const g = id => document.getElementById(id).value.trim();
+  config.namaUjian        = g('edit_namaUjian')        || CONFIG_DEFAULTS.namaUjian;
+  config.namaSekolah      = g('edit_namaSekolah')      || CONFIG_DEFAULTS.namaSekolah;
+  config.tahunPelajaran   = g('edit_tahunPelajaran')   || CONFIG_DEFAULTS.tahunPelajaran;
+  config.namaSekolahBadan = g('edit_namaSekolahBadan') || CONFIG_DEFAULTS.namaSekolahBadan;
+  config.watermark        = g('edit_watermark')        || CONFIG_DEFAULTS.watermark;
+  config.tempatTtd        = g('edit_tempatTtd')        || CONFIG_DEFAULTS.tempatTtd;
+  config.tanggalTtd       = g('edit_tanggalTtd')       || CONFIG_DEFAULTS.tanggalTtd;
+  config.jabatanKepsek    = g('edit_jabatanKepsek')    || CONFIG_DEFAULTS.jabatanKepsek;
+  config.namaKepsek       = g('edit_namaKepsek')       || CONFIG_DEFAULTS.namaKepsek;
+  const nip = g('edit_nipKepsek');
+  config.nipKepsek = nip ? 'Nip. ' + nip.replace(/^Nip\.\s*/i,'') : CONFIG_DEFAULTS.nipKepsek;
+  refreshAllCardContent();
+  const badge = document.getElementById('appliedBadge');
+  badge.style.display = 'inline-block';
+  setTimeout(() => badge.style.display = 'none', 2500);
+  setStatus('✓ Kop & tanda tangan diperbarui.','ok');
+}
+
+function resetEdits() {
+  config = { ...CONFIG_DEFAULTS };
+  const s = id => v => document.getElementById(id).value = v;
+  s('edit_namaUjian')(CONFIG_DEFAULTS.namaUjian);
+  s('edit_namaSekolah')(CONFIG_DEFAULTS.namaSekolah);
+  s('edit_tahunPelajaran')(CONFIG_DEFAULTS.tahunPelajaran);
+  s('edit_namaSekolahBadan')(CONFIG_DEFAULTS.namaSekolahBadan);
+  s('edit_watermark')(CONFIG_DEFAULTS.watermark);
+  s('edit_tempatTtd')(CONFIG_DEFAULTS.tempatTtd);
+  s('edit_tanggalTtd')(CONFIG_DEFAULTS.tanggalTtd);
+  s('edit_jabatanKepsek')(CONFIG_DEFAULTS.jabatanKepsek);
+  s('edit_namaKepsek')(CONFIG_DEFAULTS.namaKepsek);
+  s('edit_nipKepsek')(CONFIG_DEFAULTS.nipKepsek.replace('Nip. ',''));
+  bgState = { mode:'none', color:'#e8f4f8', colorOpacity:30, imageSrc:null, imageOpacity:20, imageSize:'cover' };
+  setBgMode('none');
+  document.getElementById('bgColorPicker').value = '#e8f4f8';
+  document.getElementById('bgColorOpacity').value = 30; document.getElementById('bgColorOpacityVal').textContent = '30%';
+  document.getElementById('bgImgOpacity').value  = 20; document.getElementById('bgImgOpacityVal').textContent  = '20%';
+  document.getElementById('bgImgThumb').style.display = 'none';
+  refreshAllCardContent();
+  setStatus('↺ Reset ke default.');
+}
+
+function refreshAllCardContent() {
+  document.querySelectorAll('.slot-nama-ujian').forEach(el => el.textContent = config.namaUjian);
+  document.querySelectorAll('.slot-nama-sekolah-kop').forEach(el => el.textContent = config.namaSekolah);
+  document.querySelectorAll('.slot-tahun-pelajaran').forEach(el => el.textContent = config.tahunPelajaran);
+  document.querySelectorAll('.slot-nama-sekolah-badan').forEach(el => el.textContent = config.namaSekolahBadan);
+  document.querySelectorAll('.kartu-watermark').forEach(el => {
+    const wmText = escHtml(config.watermark)+'&nbsp;&nbsp;&nbsp;'; let html='';
+    for (let i=0;i<14;i++) html += `<span>${wmText.repeat(3)}</span>`;
+    el.innerHTML = html;
+  });
+  document.querySelectorAll('.slot-titi-mangsa').forEach(el => el.textContent = config.tempatTtd+', '+config.tanggalTtd);
+  document.querySelectorAll('.slot-jabatan-kepsek').forEach(el => el.textContent = config.jabatanKepsek);
+  document.querySelectorAll('.slot-nama-kepsek').forEach(el => el.textContent = config.namaKepsek);
+  document.querySelectorAll('.slot-nip-kepsek').forEach(el => el.textContent = config.nipKepsek);
+  refreshLogosInCards(); refreshBgInCards();
+}
+
+// Logo
+function handleLogoUpload(type, input) {
+  const file = input.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const src = e.target.result;
+    if (type==='kab') {
+      logoKabSrc=src; const t=document.getElementById('thumbKab'); t.src=src; t.style.display='inline-block';
+      document.getElementById('clearKabBtn').style.display='inline'; setStatus('✓ Logo Kabupaten diupload.','ok');
+    } else {
+      logoSmpSrc=src; const t=document.getElementById('thumbSmp'); t.src=src; t.style.display='inline-block';
+      document.getElementById('clearSmpBtn').style.display='inline'; setStatus('✓ Logo Sekolah diupload.','ok');
+    }
+    refreshLogosInCards();
+  };
+  reader.readAsDataURL(file);
+}
+function clearLogo(type) {
+  if (type==='kab') {
+    logoKabSrc=null; document.getElementById('logoKabInput').value='';
+    const t=document.getElementById('thumbKab'); t.src=''; t.style.display='none';
+    document.getElementById('clearKabBtn').style.display='none';
+  } else {
+    logoSmpSrc=null; document.getElementById('logoSmpInput').value='';
+    const t=document.getElementById('thumbSmp'); t.src=''; t.style.display='none';
+    document.getElementById('clearSmpBtn').style.display='none';
+  }
+  refreshLogosInCards();
+}
+function refreshLogosInCards() {
+  document.querySelectorAll('.logo-kab-slot').forEach(el => {
+    el.innerHTML = logoKabSrc ? `<img src="${logoKabSrc}" style="width:28px;height:28px;object-fit:contain;">` : `<div class="logo-placeholder">LOGO<br>KAB</div>`;
+  });
+  document.querySelectorAll('.logo-smp-slot').forEach(el => {
+    el.innerHTML = logoSmpSrc ? `<img src="${logoSmpSrc}" style="width:28px;height:28px;object-fit:contain;">` : `<div class="logo-placeholder">LOGO<br>SMP</div>`;
+  });
+}
+
+// File load
+document.getElementById('fileInput').addEventListener('change', function(e) {
+  const file = e.target.files[0]; if (!file) return;
+  document.getElementById('fileLabel').textContent = file.name;
+  setStatus('⏳ Membaca file...','warn');
+  const reader = new FileReader();
+  reader.onload = evt => {
+    try {
+      workbook = XLSX.read(evt.target.result, {type:'binary'});
+      populateSheetSelect();
+      setStatus(`✓ File dibaca: ${file.name} (${workbook.SheetNames.length} sheet)`,'ok');
+    } catch(err) { setStatus('✗ Gagal membaca file: '+err.message,'err'); }
+  };
+  reader.readAsBinaryString(file);
+});
+
+function populateSheetSelect() {
+  const sel = document.getElementById('sheetSelect');
+  sel.innerHTML = '<option value="">— pilih sheet —</option>';
+  workbook.SheetNames.forEach(name => {
+    const opt = document.createElement('option');
+    opt.value = name; opt.textContent = name;
+    if (name.toLowerCase().includes('kelas_7') || name.toLowerCase().includes('kelas 7')) opt.selected = true;
+    sel.appendChild(opt);
+  });
+}
+
+function loadSheet() {
+  if (!workbook) return alert('Upload file terlebih dahulu!');
+  const name = document.getElementById('sheetSelect').value;
+  if (!name) return alert('Pilih sheet terlebih dahulu!');
+  const data = getSheetData(name);
+  if (!data.length) return setStatus('⚠ Sheet kosong atau header tidak ditemukan.','warn');
+  renderAllCards(data, name);
+}
+
+function loadAllSheets() {
+  if (!workbook) return alert('Upload file terlebih dahulu!');
+  let all = [];
+  workbook.SheetNames.forEach(n => {
+    const nl = n.toLowerCase();
+    if (nl.includes('kelas_7')||nl.includes('kelas 7')||nl.includes('kelas_8')||nl.includes('kelas 8'))
+      all = all.concat(getSheetData(n));
+  });
+  if (!all.length) workbook.SheetNames.forEach(n => all = all.concat(getSheetData(n)));
+  if (!all.length) return setStatus('⚠ Tidak ada data ditemukan.','warn');
+  renderAllCards(all, 'Semua Kelas');
+}
+
+function getSheetData(sheetName) {
+  const ws = workbook.Sheets[sheetName];
+  const raw = XLSX.utils.sheet_to_json(ws, {header:1, defval:''});
+  if (!raw.length) return [];
+  let hi = 0;
+  for (let i=0;i<Math.min(5,raw.length);i++) {
+    const r = raw[i].join(' ').toLowerCase();
+    if (r.includes('nama')||r.includes('no_peserta')||r.includes('nis')) { hi=i; break; }
+  }
+  const headers = raw[hi].map(h => String(h).trim().toLowerCase().replace(/\s+/g,'_').replace(/\//g,'_'));
+  const rows = [];
+  for (let i=hi+1;i<raw.length;i++) {
+    const row = raw[i];
+    if (row.every(c=>c===''||c===null||c===undefined)) continue;
+    const obj = {}; headers.forEach((h,idx)=>{ obj[h]=row[idx]!==undefined?String(row[idx]).trim():''; });
+    rows.push(obj);
+  }
+  return rows;
+}
+
+function getField(row,...keys) {
+  for (const k of keys) {
+    if (row[k]!==undefined&&row[k]!=='') return row[k];
+    const f = Object.keys(row).find(rk=>rk.includes(k));
+    if (f&&row[f]!=='') return row[f];
+  }
+  return '';
+}
+
+function renderAllCards(data, label) {
+  document.getElementById('placeholder').style.display = 'none';
+  const preview = document.getElementById('preview-area');
+  preview.querySelectorAll('.page-a4').forEach(p=>p.remove());
+  const PERPAGE = 8, total = Math.ceil(data.length/PERPAGE);
+  for (let p=0;p<total;p++) {
+    const page = document.createElement('div'); page.className='page-a4';
+    const slice = data.slice(p*PERPAGE,(p+1)*PERPAGE);
+    for (let i=0;i<PERPAGE;i++) page.appendChild(buildCard(slice[i]||null));
+    preview.appendChild(page);
+  }
+  setStatus(`✓ ${label} — ${data.length} peserta · ${total} halaman A4`,'ok');
+}
+
+function buildCard(peserta) {
+  const div = document.createElement('div'); div.className='kartu';
+  if (!peserta) { div.style.cssText='background:#f9f9f9;border:1.5px dashed #ccc;'; return div; }
+  const ruang=getField(peserta,'ruang'), nama=getField(peserta,'nama'), kelas=getField(peserta,'kelas');
+  const nis=getField(peserta,'nis_nisn','nis','nisn','nis__nisn'), nop=getField(peserta,'no_peserta','nomor_peserta');
+  const wmText=escHtml(config.watermark)+'&nbsp;&nbsp;&nbsp;'; let wmLines='';
+  for(let i=0;i<14;i++) wmLines+=`<span>${wmText.repeat(3)}</span>`;
+  const bgStyle = buildBgStyle();
+  div.innerHTML=`
+    <div class="kartu-bg" style="${bgStyle}"></div>
+    <div class="kartu-watermark">${wmLines}</div>
+    <div class="kartu-header">
+      <div class="logo-kab-slot" style="flex-shrink:0;">${logoKabSrc?`<img src="${logoKabSrc}" style="width:28px;height:28px;object-fit:contain;">`:`<div class="logo-placeholder">LOGO<br>KAB</div>`}</div>
+      <div class="header-text">
+        <div class="title-asat slot-nama-ujian">${escHtml(config.namaUjian)}</div>
+        <div class="title-sekolah slot-nama-sekolah-kop">${escHtml(config.namaSekolah)}</div>
+        <div class="title-tahun slot-tahun-pelajaran">${escHtml(config.tahunPelajaran)}</div>
+      </div>
+      <div class="logo-smp-slot" style="flex-shrink:0;">${logoSmpSrc?`<img src="${logoSmpSrc}" style="width:28px;height:28px;object-fit:contain;">`:`<div class="logo-placeholder">LOGO<br>SMP</div>`}</div>
+    </div>
+    <div class="kartu-judul"><span>KARTU PESERTA</span></div>
+    <div class="kartu-ruang-row">
+      <span class="ruang-label">RUANG :</span>
+      <div class="ruang-box">${escHtml(ruang)}</div>
+    </div>
+    <div class="kartu-data">
+      <div class="data-row"><span class="data-label">Nama</span><span class="data-colon">:</span><span class="data-value">${escHtml(nama)}</span></div>
+      <div class="data-row"><span class="data-label">Kelas</span><span class="data-colon">:</span><span class="data-value">${escHtml(kelas)}</span></div>
+      <div class="data-row"><span class="data-label">NIS / NISN</span><span class="data-colon">:</span><span class="data-value">${escHtml(nis)}</span></div>
+      <div class="data-row"><span class="data-label">No Peserta</span><span class="data-colon">:</span><span class="data-value">${escHtml(nop)}</span></div>
+      <div class="data-row"><span class="data-label">Sekolah</span><span class="data-colon">:</span><span class="data-value slot-nama-sekolah-badan">${escHtml(config.namaSekolahBadan)}</span></div>
+    </div>
+    <div class="kartu-footer">
+      <div class="ttd-area">
+        <div class="ttd-tanggal slot-titi-mangsa">${escHtml(config.tempatTtd+', '+config.tanggalTtd)}</div>
+        <div class="slot-jabatan-kepsek">${escHtml(config.jabatanKepsek)}</div>
+        <div class="ttd-nama slot-nama-kepsek">${escHtml(config.namaKepsek)}</div>
+        <div class="ttd-nip slot-nip-kepsek">${escHtml(config.nipKepsek)}</div>
+      </div>
+    </div>`;
+  return div;
+}
+
+function escHtml(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function clearAll() {
+  workbook=null;
+  document.getElementById('fileInput').value='';
+  document.getElementById('fileLabel').textContent='Upload Spreadsheet';
+  document.getElementById('sheetSelect').innerHTML='<option value="">— pilih sheet —</option>';
+  document.getElementById('preview-area').querySelectorAll('.page-a4').forEach(p=>p.remove());
+  document.getElementById('placeholder').style.display='';
+  setStatus('Data di-clear. Silakan upload file baru.');
+}
+
+// Template download
+const TEMPLATE_B64 = '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';
+function downloadTemplate() {
+  try {
+    const binary=atob(TEMPLATE_B64), bytes=new Uint8Array(binary.length);
+    for(let i=0;i<binary.length;i++) bytes[i]=binary.charCodeAt(i);
+    const blob=new Blob([bytes],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+    const url=URL.createObjectURL(blob), a=document.createElement('a');
+    a.href=url; a.download='template_kartu_peserta.xlsx';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+    setStatus('✓ Templat Excel berhasil diunduh.','ok');
+  } catch(e) { setStatus('✗ Gagal unduh: '+e.message,'err'); }
+}
+</script>
+</body>
+</html>
