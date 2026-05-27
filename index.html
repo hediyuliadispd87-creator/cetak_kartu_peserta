@@ -104,6 +104,7 @@ body {
   white-space: nowrap; outline: none;
 }
 .tb-btn svg { width: 14px; height: 14px; flex-shrink: 0; }
+.tb-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .btn-gold   { background: var(--gold); color: var(--navy); border-color: var(--gold); }
 .btn-gold:hover { background: var(--gold2); border-color: var(--gold2); }
@@ -119,6 +120,50 @@ body {
 .btn-red:hover { background: rgba(239,68,68,0.2); border-color: var(--red); }
 .btn-ghost-gold { background: rgba(245,200,66,0.08); color: var(--gold); border-color: rgba(245,200,66,0.25); }
 .btn-ghost-gold:hover, .btn-ghost-gold.active { background: rgba(245,200,66,0.18); border-color: var(--gold); }
+
+/* PDF button - distinct orange-red accent */
+.btn-pdf {
+  background: rgba(251,113,133,0.12);
+  color: #fb7185;
+  border-color: rgba(251,113,133,0.3);
+}
+.btn-pdf:hover:not(:disabled) {
+  background: rgba(251,113,133,0.22);
+  border-color: #fb7185;
+}
+
+/* PDF progress overlay */
+#pdf-overlay {
+  display: none;
+  position: fixed; inset: 0; z-index: 9999;
+  background: rgba(10,25,41,0.85);
+  backdrop-filter: blur(4px);
+  flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 16px;
+}
+#pdf-overlay.show { display: flex; }
+#pdf-overlay .pdf-box {
+  background: var(--navy2);
+  border: 1px solid rgba(251,113,133,0.3);
+  border-radius: 14px;
+  padding: 32px 40px;
+  text-align: center;
+  min-width: 280px;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.5);
+}
+#pdf-overlay .pdf-icon { font-size: 36px; margin-bottom: 12px; }
+#pdf-overlay .pdf-title { font-size: 15px; font-weight: 700; color: white; margin-bottom: 6px; }
+#pdf-overlay .pdf-sub { font-size: 12px; color: var(--muted); margin-bottom: 20px; }
+#pdf-progress-bar-wrap {
+  height: 6px; background: rgba(255,255,255,0.08);
+  border-radius: 99px; overflow: hidden; margin-bottom: 10px;
+}
+#pdf-progress-bar {
+  height: 100%; width: 0%; background: linear-gradient(90deg, #fb7185, #f43f5e);
+  border-radius: 99px; transition: width 0.2s ease;
+}
+#pdf-progress-text { font-size: 11px; color: var(--muted); }
 
 #logo-row {
   background: rgba(255,255,255,0.02);
@@ -180,7 +225,6 @@ body {
 .field input:focus { border-color: var(--gold); background: rgba(255,255,255,0.08); }
 .field input::placeholder { color: rgba(255,255,255,0.2); }
 
-/* ── STAMP/TTD UPLOAD SLOT ── */
 .stamp-slot {
   background: rgba(245,200,66,0.04);
   border: 1px dashed rgba(245,200,66,0.25);
@@ -228,7 +272,6 @@ body {
 .stamp-size-row input[type=range] { width: 80px; accent-color: var(--gold); cursor: pointer; }
 .stamp-size-val { font-size: 11px; font-weight: 700; color: var(--gold); min-width: 28px; }
 
-/* ── Background controls ── */
 .bg-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-start; }
 .bg-mode-group { display: flex; gap: 4px; align-items: center; }
 .bg-mode-btn {
@@ -271,7 +314,6 @@ body {
 }
 .edit-hint { font-size: 11px; color: rgba(255,255,255,0.25); font-style: italic; }
 
-/* ── PREVIEW ── */
 #preview-area { padding: 24px; background: #0d1f35; min-height: calc(100vh - 56px); }
 
 #placeholder { max-width: 600px; margin: 40px auto; text-align: center; }
@@ -302,7 +344,6 @@ body {
   font-size: 12px; font-family: 'Courier New', monospace; color: #7dd3fc; text-align: center;
 }
 
-/* ── A4 PAGE ── */
 .page-a4 {
   width: 210mm; min-height: 297mm; background: white;
   margin: 0 auto 20px auto; padding: 8mm;
@@ -311,15 +352,12 @@ body {
   box-shadow: 0 4px 24px rgba(0,0,0,0.4); border-radius: 2px;
 }
 
-/* ── KARTU PESERTA ── */
 .kartu {
   border: 2px solid #000; padding: 0; position: relative;
   overflow: hidden; display: flex; flex-direction: column; min-height: 66mm;
   color: #000;
 }
-.kartu * {
-  color: #000 !important;
-}
+.kartu * { color: #000 !important; }
 .kartu-bg {
   position: absolute; top: 0; left: 0; right: 0; bottom: 0;
   z-index: 0; background-size: cover; background-position: center; background-repeat: no-repeat;
@@ -370,30 +408,27 @@ body {
 .data-colon { width: 4mm; flex-shrink: 0; text-align: center; color: #000 !important; }
 .data-value { flex: 1; font-weight: normal; border-bottom: 0.5px solid #555; min-height: 10px; padding-bottom: 1px; color: #000 !important; }
 
-/* ── FOOTER ── */
 .kartu-footer {
   padding: 1mm 3mm 2mm 3mm; position: relative; z-index: 1;
   display: flex; justify-content: flex-end; flex-direction: column; align-items: flex-end;
 }
 
-/* ── TTD AREA — relative agar stamp bisa absolute di dalamnya ── */
 .ttd-area {
   text-align: center;
   font-size: 7.5px;
   font-family: 'Times New Roman', serif;
   color: #000 !important;
-  position: relative;   /* ← penting! sebagai anchor untuk stamp */
+  position: relative;
 }
 .ttd-tanggal { font-size: 7.5px; margin-bottom: 0.5mm; color: #000 !important; }
 
-/* ── STAMP: absolute, melayang di atas teks ── */
 .ttd-stamp-wrap {
   position: absolute;
-  bottom: 0;           /* rata bawah dengan ttd-area */
+  bottom: 0;
   left: 50%;
   transform: translateX(-50%);
   pointer-events: none;
-  z-index: 2;          /* di atas teks nama & NIP */
+  z-index: 2;
 }
 .ttd-stamp-wrap img {
   object-fit: contain;
@@ -401,10 +436,9 @@ body {
 }
 .ttd-stamp-wrap.hidden { display: none; }
 
-/* Spacer agar ada ruang untuk tanda tangan di bawah jabatan */
 .ttd-spacer {
   display: block;
-  height: 10mm;   /* ruang kosong untuk tanda tangan — tertimpa oleh cap */
+  height: 10mm;
 }
 
 .ttd-nama { font-size: 8px; font-weight: bold; text-decoration: underline; margin-top: 0; color: #000 !important; }
@@ -412,7 +446,7 @@ body {
 
 @media print {
   * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-  #app-header, #toolbar, #logo-row, #edit-panel { display: none !important; }
+  #app-header, #toolbar, #logo-row, #edit-panel, #pdf-overlay { display: none !important; }
   body { background: white; }
   #preview-area { padding: 0; background: white; }
   .page-a4 { margin: 0; box-shadow: none; page-break-after: always; width: 210mm; min-height: 297mm; border-radius: 0; }
@@ -421,6 +455,19 @@ body {
 </style>
 </head>
 <body>
+
+<!-- PDF Progress Overlay -->
+<div id="pdf-overlay">
+  <div class="pdf-box">
+    <div class="pdf-icon">📄</div>
+    <div class="pdf-title">Membuat PDF...</div>
+    <div class="pdf-sub" id="pdf-overlay-sub">Memproses halaman kartu peserta</div>
+    <div id="pdf-progress-bar-wrap">
+      <div id="pdf-progress-bar"></div>
+    </div>
+    <div id="pdf-progress-text">0%</div>
+  </div>
+</div>
 
 <div id="app-header">
   <div class="app-logo">🎓</div>
@@ -461,6 +508,16 @@ body {
     Cetak
   </button>
 
+  <button class="tb-btn btn-pdf" id="btnDownloadPdf" onclick="downloadPDF()">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+      <rect x="2" y="1" width="9" height="12" rx="1"/>
+      <path d="M7 1l4 4H7V1z"/>
+      <path d="M4 9h5M4 11h3"/>
+      <path d="M10 10l2 2 2-2M12 8v4"/>
+    </svg>
+    Download PDF
+  </button>
+
   <button class="tb-btn btn-red" onclick="clearAll()">
     <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="3" x2="13" y2="13"/><line x1="13" y1="3" x2="3" y2="13"/></svg>
     Clear
@@ -496,7 +553,6 @@ body {
 <div id="edit-panel">
   <div class="edit-inner">
 
-    <!-- Kop -->
     <div class="edit-section">
       <div class="edit-section-title">Kop / Header Kartu</div>
       <div class="edit-grid">
@@ -517,7 +573,6 @@ body {
       </div>
     </div>
 
-    <!-- TTD -->
     <div class="edit-section">
       <div class="edit-section-title">Tanda Tangan &amp; Titi Mangsa</div>
       <div class="edit-grid">
@@ -529,7 +584,6 @@ body {
       </div>
     </div>
 
-    <!-- ── CAP / TANDA TANGAN ── -->
     <div class="edit-section">
       <div class="edit-section-title">Cap &amp; Tanda Tangan Kepala Sekolah</div>
       <div class="stamp-slot">
@@ -564,11 +618,10 @@ body {
         </div>
       </div>
       <div style="font-size:11px;color:rgba(255,255,255,0.25);margin-top:8px;font-style:italic;">
-        Tip: scan tanda tangan di kertas putih, lalu hapus background putihnya menggunakan remove.bg sebelum diupload. Gambar cap/TTD akan melayang di atas teks nama &amp; NIP.
+        Tip: scan tanda tangan di kertas putih, lalu hapus background putihnya menggunakan remove.bg sebelum diupload.
       </div>
     </div>
 
-    <!-- Background -->
     <div class="edit-section">
       <div class="edit-section-title">Background Kartu</div>
       <div class="bg-row">
@@ -629,14 +682,16 @@ body {
       <div class="step-item"><div class="step-num">1</div><div class="step-text">Klik <strong>"Upload Spreadsheet"</strong> di toolbar atas, pilih file <strong>.xlsx</strong> atau <strong>.csv</strong></div></div>
       <div class="step-item"><div class="step-num">2</div><div class="step-text">Pilih sheet lalu klik <strong>"Load Sheet"</strong> — atau <strong>"Semua Kelas"</strong> untuk load sekaligus</div></div>
       <div class="step-item"><div class="step-num">3</div><div class="step-text">Kartu tersusun otomatis <strong>8 per halaman A4</strong> (2 kolom × 4 baris)</div></div>
-      <div class="step-item"><div class="step-num">4</div><div class="step-text">Klik <strong>"Edit Kop &amp; TTD"</strong> → unggah <strong>cap &amp; tanda tangan</strong>, atur posisi dengan slider <em>Geser Vertikal</em></div></div>
-      <div class="step-item"><div class="step-num">5</div><div class="step-text">Klik <strong>"Cetak"</strong> untuk mencetak atau simpan sebagai PDF</div></div>
+      <div class="step-item"><div class="step-num">4</div><div class="step-text">Klik <strong>"Edit Kop &amp; TTD"</strong> → unggah cap &amp; tanda tangan, atur posisi dengan slider</div></div>
+      <div class="step-item"><div class="step-num">5</div><div class="step-text">Klik <strong>"Cetak"</strong> untuk cetak langsung, atau <strong>"Download PDF"</strong> untuk simpan file PDF</div></div>
     </div>
     <div class="ph-code">Header: ruang &nbsp;|&nbsp; nama &nbsp;|&nbsp; kelas &nbsp;|&nbsp; nis_nisn &nbsp;|&nbsp; no_peserta</div>
   </div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
 let workbook = null, logoKabSrc = null, logoSmpSrc = null;
 let stampSrc = null, stampSizeMm = 20, stampOpacity = 90, stampOffsetMm = 0, stampOffsetXMm = 0;
@@ -698,19 +753,16 @@ function onStampSizeChange() {
   document.getElementById('stampSizeVal').textContent = stampSizeMm + ' mm';
   refreshStampInCards();
 }
-
 function onStampOpacityChange() {
   stampOpacity = parseInt(document.getElementById('stampOpacityRange').value);
   document.getElementById('stampOpacityVal').textContent = stampOpacity + '%';
   refreshStampInCards();
 }
-
 function onStampOffsetChange() {
   stampOffsetMm = parseInt(document.getElementById('stampOffsetRange').value);
   document.getElementById('stampOffsetVal').textContent = stampOffsetMm + ' mm';
   refreshStampInCards();
 }
-
 function onStampOffsetXChange() {
   stampOffsetXMm = parseInt(document.getElementById('stampOffsetXRange').value);
   document.getElementById('stampOffsetXVal').textContent = stampOffsetXMm + ' mm';
@@ -719,24 +771,20 @@ function onStampOffsetXChange() {
 
 function refreshStampInCards() {
   document.querySelectorAll('.ttd-stamp-wrap').forEach(wrap => {
-    if (!stampSrc) {
-      wrap.classList.add('hidden');
-      return;
-    }
+    if (!stampSrc) { wrap.classList.add('hidden'); return; }
     wrap.classList.remove('hidden');
     const img = wrap.querySelector('img');
     img.src = stampSrc;
     img.style.width  = stampSizeMm + 'mm';
     img.style.height = stampSizeMm + 'mm';
     img.style.opacity = (stampOpacity / 100).toFixed(2);
-    // Geser vertikal: bottom default 0, offset ke atas = nilai positif
     wrap.style.bottom = (-stampOffsetMm) + 'mm';
     wrap.style.left = '50%';
     wrap.style.transform = `translateX(calc(-50% + ${stampOffsetXMm}mm))`;
   });
 }
 
-/* ── WATERMARK TOGGLE & EDIT ── */
+/* ── WATERMARK ── */
 let showWatermark = false;
 function toggleWatermark() {
   showWatermark = document.getElementById('edit_showWatermark').checked;
@@ -1098,16 +1146,155 @@ function clearAll() {
   setStatus('Data di-clear. Silakan upload file baru.');
 }
 
+/* ── DOWNLOAD PDF ── */
+async function downloadPDF() {
+  const pages = document.querySelectorAll('.page-a4');
+  if (!pages.length) return alert('Tidak ada kartu untuk di-download. Load data terlebih dahulu!');
+
+  const btn = document.getElementById('btnDownloadPdf');
+  btn.disabled = true;
+
+  const overlay = document.getElementById('pdf-overlay');
+  const progressBar = document.getElementById('pdf-progress-bar');
+  const progressText = document.getElementById('pdf-progress-text');
+  const overlaySub = document.getElementById('pdf-overlay-sub');
+  overlay.classList.add('show');
+  progressBar.style.width = '0%';
+  progressText.textContent = '0%';
+
+  const setProgress = (pct, sub) => {
+    progressBar.style.width = pct + '%';
+    progressText.textContent = Math.round(pct) + '%';
+    if (sub) overlaySub.textContent = sub;
+  };
+
+  try {
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
+    // A4 dimensions in mm
+    const pageW = 210, pageH = 297;
+    // Scale: render at 2x for quality
+    const scale = 2;
+
+    for (let i = 0; i < pages.length; i++) {
+      const page = pages[i];
+      const pct = (i / pages.length) * 90;
+      setProgress(pct, `Memproses halaman ${i+1} dari ${pages.length}...`);
+
+      // Save original styles
+      const origMargin = page.style.margin;
+      const origBorderRadius = page.style.borderRadius;
+      const origBoxShadow = page.style.boxShadow;
+      page.style.margin = '0';
+      page.style.borderRadius = '0';
+      page.style.boxShadow = 'none';
+
+      // Render page to canvas
+      const canvas = await html2canvas(page, {
+        scale: scale,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#ffffff',
+        logging: false,
+        width: page.offsetWidth,
+        height: page.offsetHeight,
+      });
+
+      // Restore
+      page.style.margin = origMargin;
+      page.style.borderRadius = origBorderRadius;
+      page.style.boxShadow = origBoxShadow;
+
+      // Fit canvas to A4 page
+      const imgData = canvas.toDataURL('image/jpeg', 0.95);
+      const imgW = pageW;
+      const imgH = (canvas.height / canvas.width) * imgW;
+
+      if (i > 0) pdf.addPage();
+      pdf.addImage(imgData, 'JPEG', 0, 0, imgW, Math.min(imgH, pageH));
+
+      // Let browser breathe
+      await new Promise(r => setTimeout(r, 30));
+    }
+
+    setProgress(95, 'Menyimpan file PDF...');
+    await new Promise(r => setTimeout(r, 100));
+
+    const safeName = config.namaSekolah.replace(/[^a-zA-Z0-9\s]/g,'').replace(/\s+/g,'_').substring(0,30);
+    const fileName = `Kartu_Peserta_${safeName}.pdf`;
+    // Gunakan universalDownload agar kompatibel dengan WebView Android
+    const pdfBase64 = pdf.output('datauristring').split(',')[1];
+    universalDownload(pdfBase64, 'application/pdf', fileName);
+
+    setProgress(100, 'Selesai!');
+    await new Promise(r => setTimeout(r, 600));
+    setStatus(`✓ PDF berhasil diunduh (${pages.length} halaman).`, 'ok');
+  } catch(err) {
+    console.error(err);
+    setStatus('✗ Gagal membuat PDF: ' + err.message, 'err');
+    alert('Gagal membuat PDF: ' + err.message);
+  } finally {
+    overlay.classList.remove('show');
+    btn.disabled = false;
+  }
+}
+
 const TEMPLATE_B64 = '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';
+
+/* ── DETEKSI WEBVIEW ANDROID ── */
+function isAndroidWebView() {
+  return /Android/.test(navigator.userAgent) && /wv|WebView/.test(navigator.userAgent);
+}
+
+/* ── DOWNLOAD UNIVERSAL (WebView-safe) ── */
+// Strategi:
+//  1. Jika ada Android JS Bridge (window.Android.downloadFile) → pakai bridge
+//  2. Jika data: URI bisa dipakai (WebView modern) → buka di tab baru
+//  3. Fallback terakhir → buka data URI langsung
+function universalDownload(base64Data, mimeType, fileName) {
+  const dataURI = 'data:' + mimeType + ';base64,' + base64Data;
+
+  // 1. Android JS Bridge — tambahkan di WebViewClient Anda:
+  //    webView.addJavascriptInterface(new AndroidBridge(ctx), "Android");
+  //    AndroidBridge.downloadFile(String base64, String mime, String name)
+  if (window.Android && typeof window.Android.downloadFile === 'function') {
+    try {
+      window.Android.downloadFile(base64Data, mimeType, fileName);
+      return true;
+    } catch(e) { /* lanjut ke fallback */ }
+  }
+
+  // 2. Coba buka data URI di tab baru (bekerja di banyak WebView modern)
+  try {
+    const win = window.open(dataURI, '_blank');
+    if (win) return true;
+  } catch(e) { /* lanjut ke fallback */ }
+
+  // 3. Coba <a download> — bekerja di browser desktop & Chrome for Android
+  try {
+    const a = document.createElement('a');
+    a.href = dataURI;
+    a.download = fileName;
+    a.style.display = 'none';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => document.body.removeChild(a), 500);
+    return true;
+  } catch(e) { /* lanjut ke fallback */ }
+
+  // 4. Last resort: navigasi langsung ke data URI
+  window.location.href = dataURI;
+  return true;
+}
 
 function downloadTemplate() {
   try {
-    const binary=atob(TEMPLATE_B64), bytes=new Uint8Array(binary.length);
-    for(let i=0;i<binary.length;i++) bytes[i]=binary.charCodeAt(i);
-    const blob=new Blob([bytes],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
-    const url=URL.createObjectURL(blob), a=document.createElement('a');
-    a.href=url; a.download='template_kartu_peserta.xlsx';
-    document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+    universalDownload(
+      TEMPLATE_B64,
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'template_kartu_peserta.xlsx'
+    );
     setStatus('✓ Templat Excel berhasil diunduh.','ok');
   } catch(e) { setStatus('✗ Gagal unduh: '+e.message,'err'); }
 }
