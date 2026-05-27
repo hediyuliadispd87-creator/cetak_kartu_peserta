@@ -1242,36 +1242,23 @@ async function downloadPDF() {
 
 const TEMPLATE_B64 = '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';
 
-/* ── DETEKSI WEBVIEW ANDROID ── */
-function isAndroidWebView() {
-  return /Android/.test(navigator.userAgent) && /wv|WebView/.test(navigator.userAgent);
-}
-
-/* ── DOWNLOAD UNIVERSAL (WebView-safe) ── */
-// Strategi:
-//  1. Jika ada Android JS Bridge (window.Android.downloadFile) → pakai bridge
-//  2. Jika data: URI bisa dipakai (WebView modern) → buka di tab baru
-//  3. Fallback terakhir → buka data URI langsung
+/* ── DOWNLOAD UNIVERSAL (WebView Android-safe) ── */
+// Menggunakan AndroidInterface.downloadBase64File(base64, fileName, mimeType)
+// sesuai dengan WebAppInterface di UploadWebViewActivity.kt
 function universalDownload(base64Data, mimeType, fileName) {
-  const dataURI = 'data:' + mimeType + ';base64,' + base64Data;
-
-  // 1. Android JS Bridge — tambahkan di WebViewClient Anda:
-  //    webView.addJavascriptInterface(new AndroidBridge(ctx), "Android");
-  //    AndroidBridge.downloadFile(String base64, String mime, String name)
-  if (window.Android && typeof window.Android.downloadFile === 'function') {
+  // 1. Android JS Bridge — AndroidInterface sudah di-register di Kotlin:
+  //    webView.addJavascriptInterface(WebAppInterface(), "AndroidInterface")
+  //    @JavascriptInterface fun downloadBase64File(base64Data, fileName, mimeType)
+  //    PERHATIAN: urutan parameter = (base64, fileName, mimeType)
+  if (window.AndroidInterface && typeof window.AndroidInterface.downloadBase64File === 'function') {
     try {
-      window.Android.downloadFile(base64Data, mimeType, fileName);
+      window.AndroidInterface.downloadBase64File(base64Data, fileName, mimeType);
       return true;
     } catch(e) { /* lanjut ke fallback */ }
   }
 
-  // 2. Coba buka data URI di tab baru (bekerja di banyak WebView modern)
-  try {
-    const win = window.open(dataURI, '_blank');
-    if (win) return true;
-  } catch(e) { /* lanjut ke fallback */ }
-
-  // 3. Coba <a download> — bekerja di browser desktop & Chrome for Android
+  // 2. Fallback: <a download> dengan data URI — untuk browser desktop / Chrome
+  const dataURI = 'data:' + mimeType + ';base64,' + base64Data;
   try {
     const a = document.createElement('a');
     a.href = dataURI;
@@ -1283,7 +1270,7 @@ function universalDownload(base64Data, mimeType, fileName) {
     return true;
   } catch(e) { /* lanjut ke fallback */ }
 
-  // 4. Last resort: navigasi langsung ke data URI
+  // 3. Last resort: navigasi langsung ke data URI
   window.location.href = dataURI;
   return true;
 }
