@@ -1261,23 +1261,9 @@ function universalDownload(base64Data, mimeType, fileName) {
 
 /* ── DOWNLOAD TEMPLATE — mengambil dari Google Sheets ── */
 function downloadTemplate() {
-  // Export langsung sebagai .xlsx dari Google Sheets
   const url = 'https://docs.google.com/spreadsheets/d/18EPa5eSxZWG0qMe-b4qhZ_GnBInJlfED/export?format=xlsx';
-  try {
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'template_kartu_peserta.xlsx';
-    a.target = '_blank';
-    a.rel = 'noopener';
-    document.body.appendChild(a);
-    a.click();
-    setTimeout(() => document.body.removeChild(a), 500);
-    setStatus('✓ Templat Excel berhasil diunduh.', 'ok');
-  } catch(e) {
-    // Fallback: buka di tab baru
-    window.open(url, '_blank');
-    setStatus('✓ Templat Excel berhasil diunduh.', 'ok');
-  }
+  window.open(url, '_blank', 'noopener,noreferrer');
+  setStatus('✓ Templat Excel dibuka di tab baru.', 'ok');
 }
 </script>
 </body>
