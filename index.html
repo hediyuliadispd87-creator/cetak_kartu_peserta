@@ -1172,9 +1172,7 @@ async function downloadPDF() {
     const { jsPDF } = window.jspdf;
     const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
 
-    // A4 dimensions in mm
     const pageW = 210, pageH = 297;
-    // Scale: render at 2x for quality
     const scale = 2;
 
     for (let i = 0; i < pages.length; i++) {
@@ -1182,7 +1180,6 @@ async function downloadPDF() {
       const pct = (i / pages.length) * 90;
       setProgress(pct, `Memproses halaman ${i+1} dari ${pages.length}...`);
 
-      // Save original styles
       const origMargin = page.style.margin;
       const origBorderRadius = page.style.borderRadius;
       const origBoxShadow = page.style.boxShadow;
@@ -1190,7 +1187,6 @@ async function downloadPDF() {
       page.style.borderRadius = '0';
       page.style.boxShadow = 'none';
 
-      // Render page to canvas
       const canvas = await html2canvas(page, {
         scale: scale,
         useCORS: true,
@@ -1201,12 +1197,10 @@ async function downloadPDF() {
         height: page.offsetHeight,
       });
 
-      // Restore
       page.style.margin = origMargin;
       page.style.borderRadius = origBorderRadius;
       page.style.boxShadow = origBoxShadow;
 
-      // Fit canvas to A4 page
       const imgData = canvas.toDataURL('image/jpeg', 0.95);
       const imgW = pageW;
       const imgH = (canvas.height / canvas.width) * imgW;
@@ -1214,7 +1208,6 @@ async function downloadPDF() {
       if (i > 0) pdf.addPage();
       pdf.addImage(imgData, 'JPEG', 0, 0, imgW, Math.min(imgH, pageH));
 
-      // Let browser breathe
       await new Promise(r => setTimeout(r, 30));
     }
 
@@ -1223,7 +1216,6 @@ async function downloadPDF() {
 
     const safeName = config.namaSekolah.replace(/[^a-zA-Z0-9\s]/g,'').replace(/\s+/g,'_').substring(0,30);
     const fileName = `Kartu_Peserta_${safeName}.pdf`;
-    // Gunakan universalDownload agar kompatibel dengan WebView Android
     const pdfBase64 = pdf.output('datauristring').split(',')[1];
     universalDownload(pdfBase64, 'application/pdf', fileName);
 
@@ -1240,18 +1232,10 @@ async function downloadPDF() {
   }
 }
 
-const TEMPLATE_B64 = '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';
-
 /* ── DOWNLOAD UNIVERSAL (WebView Android-safe) ── */
-// universalDownload(base64Data, mimeType, fileName)
-// Kompatibel dengan AndroidInterface.downloadBase64File di UploadWebViewActivity.kt
 function universalDownload(base64Data, mimeType, fileName) {
-  // Bersihkan prefix "data:...;base64," jika ada — Kotlin expect raw base64
   const pureB64 = base64Data.includes(',') ? base64Data.split(',')[1] : base64Data;
 
-  // 1. Android JS Bridge
-  // Kotlin signature: downloadBase64File(base64Data: String, fileName: String, mimeType: String)
-  // ⚠ Urutan Kotlin: (base64, fileName, mimeType) — berbeda dari urutan fungsi ini!
   if (window.AndroidInterface && typeof window.AndroidInterface.downloadBase64File === 'function') {
     try {
       window.AndroidInterface.downloadBase64File(pureB64, fileName, mimeType);
@@ -1259,7 +1243,6 @@ function universalDownload(base64Data, mimeType, fileName) {
     } catch(e) { /* lanjut ke fallback */ }
   }
 
-  // 2. Fallback browser: <a download> dengan data URI
   const dataURI = 'data:' + mimeType + ';base64,' + pureB64;
   try {
     const a = document.createElement('a');
@@ -1272,20 +1255,29 @@ function universalDownload(base64Data, mimeType, fileName) {
     return true;
   } catch(e) { /* lanjut ke fallback */ }
 
-  // 3. Last resort
   window.location.href = dataURI;
   return true;
 }
 
+/* ── DOWNLOAD TEMPLATE — mengambil dari Google Sheets ── */
 function downloadTemplate() {
+  // Export langsung sebagai .xlsx dari Google Sheets
+  const url = 'https://docs.google.com/spreadsheets/d/18EPa5eSxZWG0qMe-b4qhZ_GnBInJlfED/export?format=xlsx';
   try {
-    universalDownload(
-      TEMPLATE_B64,
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      'template_kartu_peserta.xlsx'
-    );
-    setStatus('✓ Templat Excel berhasil diunduh.','ok');
-  } catch(e) { setStatus('✗ Gagal unduh: '+e.message,'err'); }
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'template_kartu_peserta.xlsx';
+    a.target = '_blank';
+    a.rel = 'noopener';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => document.body.removeChild(a), 500);
+    setStatus('✓ Templat Excel berhasil diunduh.', 'ok');
+  } catch(e) {
+    // Fallback: buka di tab baru
+    window.open(url, '_blank');
+    setStatus('✓ Templat Excel berhasil diunduh.', 'ok');
+  }
 }
 </script>
 </body>
