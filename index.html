@@ -121,7 +121,6 @@ body {
 .btn-ghost-gold { background: rgba(245,200,66,0.08); color: var(--gold); border-color: rgba(245,200,66,0.25); }
 .btn-ghost-gold:hover, .btn-ghost-gold.active { background: rgba(245,200,66,0.18); border-color: var(--gold); }
 
-/* PDF button - distinct orange-red accent */
 .btn-pdf {
   background: rgba(251,113,133,0.12);
   color: #fb7185;
@@ -132,7 +131,6 @@ body {
   border-color: #fb7185;
 }
 
-/* PDF progress overlay */
 #pdf-overlay {
   display: none;
   position: fixed; inset: 0; z-index: 9999;
@@ -1259,11 +1257,63 @@ function universalDownload(base64Data, mimeType, fileName) {
   return true;
 }
 
-/* ── DOWNLOAD TEMPLATE — mengambil dari Google Sheets ── */
+/* ── DOWNLOAD TEMPLATE — generate langsung dengan SheetJS (sama seperti denah ruangan) ── */
 function downloadTemplate() {
-  const url = 'https://docs.google.com/spreadsheets/d/18EPa5eSxZWG0qMe-b4qhZ_GnBInJlfED/export?format=xlsx';
-  window.open(url, '_blank', 'noopener,noreferrer');
-  setStatus('✓ Templat Excel dibuka di tab baru.', 'ok');
+  const wb = XLSX.utils.book_new();
+
+  // Sheet Kelas 7
+  const dataKelas7 = [
+    ['ruang', 'nama', 'kelas', 'nis_nisn', 'no_peserta'],
+    [1, 'Ahmad Fauzi',        '7A', '0011234567 / 1234567890', '701'],
+    [1, 'Siti Rahayu',        '7A', '0011234568 / 1234567891', '702'],
+    [1, 'Rizky Pratama',      '7A', '0011234569 / 1234567892', '703'],
+    [1, 'Nurul Hidayah',      '7A', '0011234570 / 1234567893', '704'],
+    [1, 'Hendra Gunawan',     '7A', '0011234571 / 1234567894', '705'],
+    [1, 'Joko Prasetyo',      '7A', '0011234572 / 1234567895', '706'],
+    [1, 'Lina Marlina',       '7A', '0011234573 / 1234567896', '707'],
+    [1, 'Nanda Putra',        '7A', '0011234574 / 1234567897', '708'],
+    [2, 'Pandu Wicaksono',    '7B', '0011234575 / 1234567898', '709'],
+    [2, 'Reza Fardhan',       '7B', '0011234576 / 1234567899', '710'],
+    [2, 'Tika Wulandari',     '7B', '0011234577 / 1234567900', '711'],
+    [2, 'Vina Fitriani',      '7B', '0011234578 / 1234567901', '712'],
+    [2, 'Wahyu Nugroho',      '7B', '0011234579 / 1234567902', '713'],
+    [2, 'Xena Mareta',        '7B', '0011234580 / 1234567903', '714'],
+    [2, 'Yusuf Ibrahim',      '7B', '0011234581 / 1234567904', '715'],
+    [2, 'Zahra Amini',        '7B', '0011234582 / 1234567905', '716'],
+  ];
+
+  // Sheet Kelas 8
+  const dataKelas8 = [
+    ['ruang', 'nama', 'kelas', 'nis_nisn', 'no_peserta'],
+    [3, 'Budi Santoso',       '8A', '0021234567 / 2234567890', '801'],
+    [3, 'Dewi Lestari',       '8A', '0021234568 / 2234567891', '802'],
+    [3, 'Eka Putri',          '8A', '0021234569 / 2234567892', '803'],
+    [3, 'Fajar Setiawan',     '8A', '0021234570 / 2234567893', '804'],
+    [3, 'Indah Permata',      '8A', '0021234571 / 2234567894', '805'],
+    [3, 'Kartika Sari',       '8A', '0021234572 / 2234567895', '806'],
+    [3, 'Mahmud Syarif',      '8A', '0021234573 / 2234567896', '807'],
+    [3, 'Oktavia Dewi',       '8A', '0021234574 / 2234567897', '808'],
+    [4, 'Qory Amelia',        '8B', '0021234575 / 2234567898', '809'],
+    [4, 'Sandi Kurniawan',    '8B', '0021234576 / 2234567899', '810'],
+    [4, 'Umar Hakim',         '8B', '0021234577 / 2234567900', '811'],
+    [4, 'Aditya Bagas',       '8B', '0021234578 / 2234567901', '812'],
+    [4, 'Bella Natasya',      '8B', '0021234579 / 2234567902', '813'],
+    [4, 'Candra Wijaya',      '8B', '0021234580 / 2234567903', '814'],
+    [4, 'Diana Fitri',        '8B', '0021234581 / 2234567904', '815'],
+    [4, 'Evan Maulana',       '8B', '0021234582 / 2234567905', '816'],
+  ];
+
+  const wsKelas7 = XLSX.utils.aoa_to_sheet(dataKelas7);
+  wsKelas7['!cols'] = [{ wch:8 }, { wch:22 }, { wch:8 }, { wch:24 }, { wch:12 }];
+
+  const wsKelas8 = XLSX.utils.aoa_to_sheet(dataKelas8);
+  wsKelas8['!cols'] = [{ wch:8 }, { wch:22 }, { wch:8 }, { wch:24 }, { wch:12 }];
+
+  XLSX.utils.book_append_sheet(wb, wsKelas7, 'Kelas_7');
+  XLSX.utils.book_append_sheet(wb, wsKelas8, 'Kelas_8');
+
+  XLSX.writeFile(wb, 'template_kartu_peserta.xlsx');
+  setStatus('✓ Templat Excel berhasil didownload.', 'ok');
 }
 </script>
 </body>
