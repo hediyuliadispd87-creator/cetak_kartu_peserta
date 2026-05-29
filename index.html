@@ -2,489 +2,337 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Generator Kartu Peserta</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
 :root {
-  --navy:    #0f2340;
-  --navy2:   #1a3658;
-  --navy3:   #234778;
-  --gold:    #f5c842;
-  --gold2:   #e8b830;
-  --teal:    #0ea5a0;
-  --green:   #22c55e;
-  --red:     #ef4444;
-  --purple:  #8b5cf6;
-  --text:    #e2e8f0;
-  --muted:   #94a3b8;
-  --border:  rgba(255,255,255,0.08);
-  --surface: rgba(255,255,255,0.05);
-  --radius:  8px;
+  --navy:#0f2340; --navy2:#1a3658; --navy3:#234778;
+  --gold:#f5c842; --gold2:#e8b830;
+  --teal:#0ea5a0; --green:#22c55e; --red:#ef4444; --purple:#8b5cf6;
+  --text:#e2e8f0; --muted:#94a3b8;
+  --border:rgba(255,255,255,0.08); --surface:rgba(255,255,255,0.05);
+  --radius:8px;
 }
+html { -webkit-text-size-adjust:100%; }
+body { font-family:'Plus Jakarta Sans',sans-serif; background:#0a1929; color:var(--text); min-height:100vh; overflow-x:hidden; }
 
-body {
-  font-family: 'Plus Jakarta Sans', sans-serif;
-  background: #0a1929;
-  color: var(--text);
-  min-height: 100vh;
-}
-
+/* ── HEADER ── */
 #app-header {
-  background: linear-gradient(135deg, var(--navy) 0%, var(--navy2) 100%);
-  border-bottom: 1px solid rgba(245,200,66,0.2);
-  padding: 0 24px;
-  height: 56px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  box-shadow: 0 2px 20px rgba(0,0,0,0.4);
+  background:linear-gradient(135deg,var(--navy) 0%,var(--navy2) 100%);
+  border-bottom:1px solid rgba(245,200,66,0.2);
+  padding:0 16px; height:52px;
+  display:flex; align-items:center; gap:10px;
+  position:sticky; top:0; z-index:200;
+  box-shadow:0 2px 20px rgba(0,0,0,0.4);
 }
-#app-header .app-logo {
-  width: 32px; height: 32px;
-  background: var(--gold);
-  border-radius: 8px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 16px;
-  flex-shrink: 0;
-}
-#app-header h1 { font-size: 15px; font-weight: 700; color: white; letter-spacing: -0.3px; }
-#app-header .header-sep { width: 1px; height: 20px; background: var(--border); margin: 0 4px; }
-#status-bar { font-size: 12px; color: var(--muted); flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-#status-bar.ok   { color: #4ade80; }
-#status-bar.warn { color: var(--gold); }
-#status-bar.err  { color: #f87171; }
+#app-header .app-logo { width:30px; height:30px; background:var(--gold); border-radius:7px; display:flex; align-items:center; justify-content:center; font-size:15px; flex-shrink:0; }
+#app-header h1 { font-size:13px; font-weight:700; color:white; letter-spacing:-0.3px; flex:1; }
+#status-chip { font-size:10px; padding:3px 8px; border-radius:20px; font-weight:600; background:rgba(255,255,255,0.08); color:var(--muted); white-space:nowrap; max-width:120px; overflow:hidden; text-overflow:ellipsis; flex-shrink:0; }
+#status-chip.ok   { background:rgba(74,222,128,0.15); color:#4ade80; }
+#status-chip.warn { background:rgba(245,200,66,0.15); color:var(--gold); }
+#status-chip.err  { background:rgba(248,113,113,0.15); color:#f87171; }
 
-#toolbar {
-  background: var(--navy2);
-  border-bottom: 1px solid var(--border);
-  padding: 10px 24px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  align-items: center;
+/* ── BOTTOM NAV ── */
+#bottom-nav {
+  display:none; position:fixed; bottom:0; left:0; right:0; z-index:150;
+  background:var(--navy2); border-top:1px solid var(--border);
+  padding:0 8px env(safe-area-inset-bottom,0px);
+  height:calc(56px + env(safe-area-inset-bottom,0px));
+  align-items:flex-start; justify-content:space-around; gap:4px;
+  box-shadow:0 -4px 20px rgba(0,0,0,0.3);
 }
+.bnav-btn { display:flex; flex-direction:column; align-items:center; gap:3px; padding:8px 4px 4px; background:none; border:none; cursor:pointer; color:var(--muted); font-family:inherit; font-size:10px; font-weight:600; min-width:52px; flex:1; transition:color 0.15s; -webkit-tap-highlight-color:transparent; }
+.bnav-btn .bico { font-size:20px; line-height:1; }
+.bnav-btn.active { color:var(--gold); }
+.bnav-btn:disabled { opacity:0.4; }
 
-.upload-pill {
-  display: flex; align-items: center; gap: 8px;
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: 6px; padding: 0 12px 0 6px; height: 34px;
-  cursor: pointer; transition: border-color 0.2s, background 0.2s;
-}
-.upload-pill:hover { border-color: rgba(255,255,255,0.2); background: rgba(255,255,255,0.08); }
-.upload-pill .pill-icon {
-  width: 22px; height: 22px; background: rgba(245,200,66,0.15);
-  border-radius: 4px; display: flex; align-items: center; justify-content: center;
-  font-size: 12px; flex-shrink: 0;
-}
-.upload-pill span { font-size: 12px; color: var(--text); font-weight: 500; white-space: nowrap; }
+/* ── MOBILE TOOLBAR ── */
+#mobile-toolbar { display:none; background:var(--navy); border-bottom:1px solid var(--border); padding:12px 16px 14px; flex-direction:column; gap:10px; }
 
-#sheetSelect {
-  height: 34px; padding: 0 10px; border-radius: 6px;
-  border: 1px solid var(--border); background: var(--surface);
-  color: var(--text); font-family: inherit; font-size: 12px;
-  cursor: pointer; outline: none; transition: border-color 0.2s; min-width: 120px;
-}
-#sheetSelect:focus { border-color: var(--gold); }
-#sheetSelect option { background: #1a3658; }
+/* ── DESKTOP TOOLBAR ── */
+#toolbar { background:var(--navy2); border-bottom:1px solid var(--border); padding:10px 24px; display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
 
-.tb-sep { width: 1px; height: 20px; background: var(--border); flex-shrink: 0; }
+.upload-pill { display:flex; align-items:center; gap:8px; background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:0 12px 0 6px; height:34px; cursor:pointer; transition:border-color 0.2s,background 0.2s; -webkit-tap-highlight-color:transparent; }
+.upload-pill:hover { border-color:rgba(255,255,255,0.2); background:rgba(255,255,255,0.08); }
+.upload-pill .pill-icon { width:22px; height:22px; background:rgba(245,200,66,0.15); border-radius:4px; display:flex; align-items:center; justify-content:center; font-size:12px; flex-shrink:0; }
+.upload-pill span { font-size:12px; color:var(--text); font-weight:500; white-space:nowrap; }
 
-.tb-btn {
-  display: inline-flex; align-items: center; gap: 6px;
-  height: 34px; padding: 0 14px; border-radius: 6px;
-  border: 1px solid transparent; font-family: inherit; font-size: 12px;
-  font-weight: 600; cursor: pointer; transition: all 0.15s;
-  white-space: nowrap; outline: none;
-}
-.tb-btn svg { width: 14px; height: 14px; flex-shrink: 0; }
-.tb-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+#sheetSelect { height:34px; padding:0 10px; border-radius:6px; border:1px solid var(--border); background:var(--surface); color:var(--text); font-family:inherit; font-size:12px; cursor:pointer; outline:none; min-width:120px; }
+#sheetSelect option { background:#1a3658; }
+#sheetSelectMobile { width:100%; height:44px; padding:0 12px; border-radius:8px; border:1px solid var(--border); background:rgba(255,255,255,0.07); color:var(--text); font-family:inherit; font-size:14px; cursor:pointer; outline:none; }
+#sheetSelectMobile option { background:#1a3658; }
 
-.btn-gold   { background: var(--gold); color: var(--navy); border-color: var(--gold); }
-.btn-gold:hover { background: var(--gold2); border-color: var(--gold2); }
-.btn-outline { background: transparent; color: var(--text); border-color: var(--border); }
-.btn-outline:hover { background: var(--surface); border-color: rgba(255,255,255,0.2); }
-.btn-teal  { background: rgba(14,165,160,0.15); color: #2dd4bf; border-color: rgba(14,165,160,0.3); }
-.btn-teal:hover { background: rgba(14,165,160,0.25); border-color: var(--teal); }
-.btn-green { background: rgba(34,197,94,0.12); color: #4ade80; border-color: rgba(34,197,94,0.25); }
-.btn-green:hover { background: rgba(34,197,94,0.22); border-color: var(--green); }
-.btn-purple { background: rgba(139,92,246,0.12); color: #a78bfa; border-color: rgba(139,92,246,0.25); }
-.btn-purple:hover { background: rgba(139,92,246,0.22); border-color: var(--purple); }
-.btn-red { background: rgba(239,68,68,0.1); color: #f87171; border-color: rgba(239,68,68,0.2); }
-.btn-red:hover { background: rgba(239,68,68,0.2); border-color: var(--red); }
-.btn-ghost-gold { background: rgba(245,200,66,0.08); color: var(--gold); border-color: rgba(245,200,66,0.25); }
-.btn-ghost-gold:hover, .btn-ghost-gold.active { background: rgba(245,200,66,0.18); border-color: var(--gold); }
+.tb-sep { width:1px; height:20px; background:var(--border); flex-shrink:0; }
+.tb-btn { display:inline-flex; align-items:center; gap:6px; height:34px; padding:0 14px; border-radius:6px; border:1px solid transparent; font-family:inherit; font-size:12px; font-weight:600; cursor:pointer; transition:all 0.15s; white-space:nowrap; outline:none; -webkit-tap-highlight-color:transparent; }
+.tb-btn svg { width:14px; height:14px; flex-shrink:0; }
+.tb-btn:disabled { opacity:0.5; cursor:not-allowed; }
+.mb-btn { display:flex; align-items:center; justify-content:center; gap:8px; width:100%; height:46px; border-radius:8px; border:1px solid transparent; font-family:inherit; font-size:13px; font-weight:600; cursor:pointer; transition:all 0.15s; -webkit-tap-highlight-color:transparent; }
+.mb-btn svg { width:16px; height:16px; flex-shrink:0; }
+.mb-btn:disabled { opacity:0.5; }
+.mb-row { display:flex; gap:8px; }
+.mb-row .mb-btn { flex:1; }
 
-.btn-pdf {
-  background: rgba(251,113,133,0.12);
-  color: #fb7185;
-  border-color: rgba(251,113,133,0.3);
-}
-.btn-pdf:hover:not(:disabled) {
-  background: rgba(251,113,133,0.22);
-  border-color: #fb7185;
-}
+.btn-gold   { background:var(--gold); color:var(--navy); border-color:var(--gold); }
+.btn-gold:hover { background:var(--gold2); }
+.btn-outline { background:transparent; color:var(--text); border-color:var(--border); }
+.btn-outline:hover { background:var(--surface); }
+.btn-teal  { background:rgba(14,165,160,0.15); color:#2dd4bf; border-color:rgba(14,165,160,0.3); }
+.btn-green { background:rgba(34,197,94,0.12); color:#4ade80; border-color:rgba(34,197,94,0.25); }
+.btn-purple { background:rgba(139,92,246,0.12); color:#a78bfa; border-color:rgba(139,92,246,0.25); }
+.btn-red { background:rgba(239,68,68,0.1); color:#f87171; border-color:rgba(239,68,68,0.2); }
+.btn-ghost-gold { background:rgba(245,200,66,0.08); color:var(--gold); border-color:rgba(245,200,66,0.25); }
+.btn-ghost-gold.active { background:rgba(245,200,66,0.18); border-color:var(--gold); }
+.btn-pdf { background:rgba(251,113,133,0.12); color:#fb7185; border-color:rgba(251,113,133,0.3); }
+.btn-pdf:hover:not(:disabled) { background:rgba(251,113,133,0.22); border-color:#fb7185; }
 
-#pdf-overlay {
-  display: none;
-  position: fixed; inset: 0; z-index: 9999;
-  background: rgba(10,25,41,0.85);
-  backdrop-filter: blur(4px);
-  flex-direction: column;
-  align-items: center; justify-content: center;
-  gap: 16px;
-}
-#pdf-overlay.show { display: flex; }
-#pdf-overlay .pdf-box {
-  background: var(--navy2);
-  border: 1px solid rgba(251,113,133,0.3);
-  border-radius: 14px;
-  padding: 32px 40px;
-  text-align: center;
-  min-width: 280px;
-  box-shadow: 0 8px 40px rgba(0,0,0,0.5);
-}
-#pdf-overlay .pdf-icon { font-size: 36px; margin-bottom: 12px; }
-#pdf-overlay .pdf-title { font-size: 15px; font-weight: 700; color: white; margin-bottom: 6px; }
-#pdf-overlay .pdf-sub { font-size: 12px; color: var(--muted); margin-bottom: 20px; }
-#pdf-progress-bar-wrap {
-  height: 6px; background: rgba(255,255,255,0.08);
-  border-radius: 99px; overflow: hidden; margin-bottom: 10px;
-}
-#pdf-progress-bar {
-  height: 100%; width: 0%; background: linear-gradient(90deg, #fb7185, #f43f5e);
-  border-radius: 99px; transition: width 0.2s ease;
-}
-#pdf-progress-text { font-size: 11px; color: var(--muted); }
+/* ── PDF OVERLAY ── */
+#pdf-overlay { display:none; position:fixed; inset:0; z-index:9999; background:rgba(10,25,41,0.9); backdrop-filter:blur(4px); flex-direction:column; align-items:center; justify-content:center; gap:16px; padding:20px; }
+#pdf-overlay.show { display:flex; }
+#pdf-overlay .pdf-box { background:var(--navy2); border:1px solid rgba(251,113,133,0.3); border-radius:14px; padding:28px 32px; text-align:center; width:100%; max-width:320px; box-shadow:0 8px 40px rgba(0,0,0,0.5); }
+#pdf-overlay .pdf-icon { font-size:36px; margin-bottom:12px; }
+#pdf-overlay .pdf-title { font-size:15px; font-weight:700; color:white; margin-bottom:6px; }
+#pdf-overlay .pdf-sub { font-size:12px; color:var(--muted); margin-bottom:20px; }
+#pdf-progress-bar-wrap { height:6px; background:rgba(255,255,255,0.08); border-radius:99px; overflow:hidden; margin-bottom:10px; }
+#pdf-progress-bar { height:100%; width:0%; background:linear-gradient(90deg,#fb7185,#f43f5e); border-radius:99px; transition:width 0.2s ease; }
+#pdf-progress-text { font-size:11px; color:var(--muted); }
 
-#logo-row {
-  background: rgba(255,255,255,0.02);
-  border-bottom: 1px solid var(--border);
-  padding: 8px 24px;
-  display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
-}
-.logo-slot {
-  display: flex; align-items: center; gap: 8px;
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: 6px; padding: 5px 10px; transition: border-color 0.2s;
-}
-.logo-slot:hover { border-color: rgba(255,255,255,0.18); }
-.logo-slot-label { font-size: 11px; color: var(--muted); white-space: nowrap; }
-.logo-thumb {
-  width: 24px; height: 24px; border-radius: 4px; object-fit: contain;
-  display: none; border: 1px solid rgba(245,200,66,0.4); background: white;
-}
-.logo-upload-btn {
-  height: 24px; padding: 0 10px; border-radius: 4px;
-  border: 1px dashed rgba(255,255,255,0.2); background: transparent;
-  color: var(--muted); font-family: inherit; font-size: 11px;
-  cursor: pointer; transition: all 0.15s; white-space: nowrap;
-}
-.logo-upload-btn:hover { border-color: var(--gold); color: var(--gold); }
-.logo-clear {
-  background: transparent; border: none; color: #f87171;
-  font-size: 13px; cursor: pointer; display: none; line-height: 1;
-  padding: 2px; opacity: 0.7; transition: opacity 0.15s;
-}
-.logo-clear:hover { opacity: 1; }
+/* ── LOGO ROW ── */
+#logo-row { background:rgba(255,255,255,0.02); border-bottom:1px solid var(--border); padding:8px 16px; display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+.logo-slot { display:flex; align-items:center; gap:8px; background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:5px 10px; }
+.logo-slot-label { font-size:11px; color:var(--muted); white-space:nowrap; }
+.logo-thumb { width:24px; height:24px; border-radius:4px; object-fit:contain; display:none; border:1px solid rgba(245,200,66,0.4); background:white; }
+.logo-upload-btn { height:26px; padding:0 10px; border-radius:4px; border:1px dashed rgba(255,255,255,0.2); background:transparent; color:var(--muted); font-family:inherit; font-size:11px; cursor:pointer; white-space:nowrap; -webkit-tap-highlight-color:transparent; }
+.logo-upload-btn:hover { border-color:var(--gold); color:var(--gold); }
+.logo-clear { background:transparent; border:none; color:#f87171; font-size:13px; cursor:pointer; display:none; padding:4px; opacity:0.7; }
 
-#edit-panel {
-  background: var(--navy); border-bottom: 1px solid var(--border);
-  overflow: hidden; max-height: 0;
-  transition: max-height 0.4s cubic-bezier(0.4,0,0.2,1);
-}
-#edit-panel.open { max-height: 1000px; }
+/* ── EDIT PANEL ── */
+#edit-panel { background:var(--navy); border-bottom:1px solid var(--border); overflow:hidden; max-height:0; transition:max-height 0.4s cubic-bezier(0.4,0,0.2,1); }
+#edit-panel.open { max-height:2000px; }
+.edit-inner { padding:16px; display:flex; flex-direction:column; gap:20px; }
+.edit-section-title { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:1.2px; color:var(--gold); margin-bottom:12px; display:flex; align-items:center; gap:8px; }
+.edit-section-title::after { content:''; flex:1; height:1px; background:rgba(245,200,66,0.12); }
+.edit-grid { display:grid; grid-template-columns:1fr; gap:10px; }
+@media(min-width:600px) { .edit-grid { grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:10px 16px; } }
+.field { display:flex; flex-direction:column; gap:4px; }
+.field label { font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:0.6px; color:var(--muted); }
+.field input { height:40px; padding:0 10px; border-radius:5px; border:1px solid var(--border); background:rgba(255,255,255,0.05); color:var(--text); font-family:inherit; font-size:13px; outline:none; transition:border-color 0.15s,background 0.15s; }
+.field input:focus { border-color:var(--gold); background:rgba(255,255,255,0.08); }
+.field input::placeholder { color:rgba(255,255,255,0.2); }
 
-.edit-inner { padding: 20px 24px 16px; display: flex; flex-direction: column; gap: 20px; }
+.stamp-slot { background:rgba(245,200,66,0.04); border:1px dashed rgba(245,200,66,0.25); border-radius:8px; padding:12px 16px; display:flex; align-items:flex-start; gap:14px; flex-wrap:wrap; }
+.stamp-preview-wrap { width:68px; height:68px; border-radius:6px; border:1px solid var(--border); background:white; display:flex; align-items:center; justify-content:center; flex-shrink:0; overflow:hidden; }
+.stamp-preview-wrap img { width:100%; height:100%; object-fit:contain; display:none; }
+.stamp-placeholder-text { font-size:9px; color:#aaa; text-align:center; line-height:1.4; padding:4px; }
+.stamp-controls { display:flex; flex-direction:column; gap:8px; flex:1; min-width:200px; }
+.stamp-controls .logo-slot-label { font-size:12px; color:var(--text); font-weight:600; }
+.stamp-controls small { font-size:11px; color:var(--muted); }
+.stamp-btn-row { display:flex; gap:6px; flex-wrap:wrap; }
+.stamp-upload-btn { height:34px; padding:0 14px; border-radius:5px; border:1px solid rgba(245,200,66,0.35); background:rgba(245,200,66,0.1); color:var(--gold); font-family:inherit; font-size:12px; font-weight:600; cursor:pointer; white-space:nowrap; }
+.stamp-clear-btn { height:34px; padding:0 12px; border-radius:5px; border:1px solid rgba(239,68,68,0.25); background:rgba(239,68,68,0.08); color:#f87171; font-family:inherit; font-size:12px; cursor:pointer; display:none; }
+.stamp-size-row { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.stamp-size-row label { font-size:11px; color:var(--muted); min-width:90px; }
+.stamp-size-row input[type=range] { flex:1; min-width:80px; accent-color:var(--gold); cursor:pointer; }
+.stamp-size-val { font-size:11px; font-weight:700; color:var(--gold); min-width:36px; text-align:right; }
 
-.edit-section-title {
-  font-size: 10px; font-weight: 700; text-transform: uppercase;
-  letter-spacing: 1.2px; color: var(--gold); margin-bottom: 12px;
-  display: flex; align-items: center; gap: 8px;
-}
-.edit-section-title::after { content: ''; flex: 1; height: 1px; background: rgba(245,200,66,0.12); }
+.bg-row { display:flex; flex-wrap:wrap; gap:12px; align-items:flex-start; }
+.bg-mode-group { display:flex; gap:4px; flex-wrap:wrap; }
+.bg-mode-btn { height:34px; padding:0 12px; border-radius:5px; border:1px solid var(--border); background:transparent; color:var(--muted); font-family:inherit; font-size:12px; font-weight:500; cursor:pointer; transition:all 0.15s; }
+.bg-mode-btn.active { background:rgba(245,200,66,0.12); border-color:rgba(245,200,66,0.35); color:var(--gold); font-weight:700; }
+.bg-control { display:none; align-items:center; gap:10px; flex-wrap:wrap; width:100%; }
+.bg-control.show { display:flex; }
+.color-swatch { width:36px; height:34px; border-radius:5px; border:1px solid var(--border); padding:2px; background:transparent; cursor:pointer; }
+.range-group { display:flex; align-items:center; gap:6px; flex:1; }
+.range-group label { font-size:11px; color:var(--muted); white-space:nowrap; }
+.range-group input[type=range] { flex:1; min-width:80px; accent-color:var(--gold); cursor:pointer; }
+.range-val { font-size:11px; font-weight:700; color:var(--gold); min-width:34px; }
+.bg-size-sel { height:34px; padding:0 8px; border-radius:5px; border:1px solid var(--border); background:var(--surface); color:var(--text); font-family:inherit; font-size:11px; cursor:pointer; outline:none; }
+.bg-img-preview { width:40px; height:34px; object-fit:cover; border-radius:4px; border:1px solid rgba(245,200,66,0.3); display:none; }
+.btn-sm-danger { height:30px; padding:0 10px; border-radius:4px; border:1px solid rgba(239,68,68,0.25); background:rgba(239,68,68,0.08); color:#f87171; font-family:inherit; font-size:11px; cursor:pointer; }
+.edit-footer { display:flex; align-items:center; gap:10px; padding-top:12px; border-top:1px solid var(--border); flex-wrap:wrap; }
+.applied-badge { display:none; font-size:10px; font-weight:700; background:rgba(34,197,94,0.15); color:#4ade80; border:1px solid rgba(34,197,94,0.25); border-radius:20px; padding:3px 10px; }
 
-.edit-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px 16px; }
+/* ── SHEET MODAL ── */
+#sheet-modal { display:none; position:fixed; inset:0; z-index:300; background:rgba(10,25,41,0.85); backdrop-filter:blur(4px); align-items:flex-end; justify-content:center; }
+#sheet-modal.show { display:flex; }
+.sheet-modal-box { background:var(--navy2); border-radius:16px 16px 0 0; border:1px solid var(--border); border-bottom:none; width:100%; max-width:500px; padding:0 0 env(safe-area-inset-bottom,16px) 0; box-shadow:0 -8px 40px rgba(0,0,0,0.5); animation:slideUp 0.25s ease; }
+@keyframes slideUp { from{transform:translateY(100%)} to{transform:translateY(0)} }
+.modal-header { display:flex; align-items:center; justify-content:space-between; padding:16px 20px 12px; border-bottom:1px solid var(--border); }
+.modal-header h3 { font-size:15px; font-weight:700; color:white; }
+.modal-close { width:28px; height:28px; border-radius:50%; background:rgba(255,255,255,0.08); border:none; color:var(--muted); font-size:16px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+.modal-body { padding:16px 20px; display:flex; flex-direction:column; gap:10px; }
 
-.field { display: flex; flex-direction: column; gap: 4px; }
-.field label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.6px; color: var(--muted); }
-.field input {
-  height: 32px; padding: 0 10px; border-radius: 5px;
-  border: 1px solid var(--border); background: rgba(255,255,255,0.05);
-  color: var(--text); font-family: inherit; font-size: 12px;
-  transition: border-color 0.15s, background 0.15s; outline: none;
-}
-.field input:focus { border-color: var(--gold); background: rgba(255,255,255,0.08); }
-.field input::placeholder { color: rgba(255,255,255,0.2); }
+/* ── MORE MODAL ── */
+#more-modal { display:none; position:fixed; inset:0; z-index:300; background:rgba(10,25,41,0.85); backdrop-filter:blur(4px); align-items:flex-end; justify-content:center; }
+#more-modal.show { display:flex; }
+.more-modal-box { background:var(--navy2); border-radius:16px 16px 0 0; border:1px solid var(--border); border-bottom:none; width:100%; max-width:500px; padding:0 0 env(safe-area-inset-bottom,16px) 0; box-shadow:0 -8px 40px rgba(0,0,0,0.5); animation:slideUp 0.25s ease; }
+.more-grid { padding:16px 20px; display:grid; grid-template-columns:1fr 1fr; gap:8px; }
 
-.stamp-slot {
-  background: rgba(245,200,66,0.04);
-  border: 1px dashed rgba(245,200,66,0.25);
-  border-radius: 8px;
-  padding: 12px 16px;
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  flex-wrap: wrap;
-}
-.stamp-preview-wrap {
-  width: 72px; height: 72px;
-  border-radius: 6px; border: 1px solid var(--border);
-  background: white;
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0; overflow: hidden; position: relative;
-}
-.stamp-preview-wrap img {
-  width: 100%; height: 100%; object-fit: contain;
-  display: none;
-}
-.stamp-placeholder-text {
-  font-size: 9px; color: #aaa; text-align: center; line-height: 1.4; padding: 4px;
-}
-.stamp-controls { display: flex; flex-direction: column; gap: 8px; }
-.stamp-controls .logo-slot-label { font-size: 12px; color: var(--text); font-weight: 600; }
-.stamp-controls small { font-size: 11px; color: var(--muted); }
-.stamp-btn-row { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
-.stamp-upload-btn {
-  height: 28px; padding: 0 12px; border-radius: 5px;
-  border: 1px solid rgba(245,200,66,0.35); background: rgba(245,200,66,0.1);
-  color: var(--gold); font-family: inherit; font-size: 11px; font-weight: 600;
-  cursor: pointer; transition: all 0.15s; white-space: nowrap;
-}
-.stamp-upload-btn:hover { background: rgba(245,200,66,0.2); border-color: var(--gold); }
-.stamp-clear-btn {
-  height: 28px; padding: 0 10px; border-radius: 5px;
-  border: 1px solid rgba(239,68,68,0.25); background: rgba(239,68,68,0.08);
-  color: #f87171; font-family: inherit; font-size: 11px;
-  cursor: pointer; transition: all 0.15s; display: none;
-}
-.stamp-clear-btn:hover { background: rgba(239,68,68,0.18); border-color: var(--red); }
-.stamp-size-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 2px; }
-.stamp-size-row label { font-size: 11px; color: var(--muted); }
-.stamp-size-row input[type=range] { width: 80px; accent-color: var(--gold); cursor: pointer; }
-.stamp-size-val { font-size: 11px; font-weight: 700; color: var(--gold); min-width: 28px; }
+/* ── PREVIEW ── */
+#preview-area { padding:16px; background:#0d1f35; min-height:calc(100vh - 52px); }
+#placeholder { max-width:560px; margin:24px auto; text-align:center; padding:0 4px; }
+#placeholder .ph-icon { font-size:40px; margin-bottom:12px; }
+#placeholder h2 { font-size:20px; font-weight:700; color:white; margin-bottom:6px; }
+#placeholder .ph-sub { font-size:13px; color:var(--muted); margin-bottom:20px; }
+.steps-card { background:var(--navy2); border:1px solid var(--border); border-radius:12px; padding:16px 18px; text-align:left; }
+.step-item { display:flex; align-items:flex-start; gap:10px; padding:8px 0; border-bottom:1px solid var(--border); }
+.step-item:last-child { border-bottom:none; }
+.step-num { width:22px; height:22px; border-radius:50%; background:rgba(245,200,66,0.12); border:1px solid rgba(245,200,66,0.25); color:var(--gold); font-size:10px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:2px; }
+.step-text { font-size:12px; color:var(--text); line-height:1.6; }
+.step-text strong { color:white; }
+.ph-code { margin-top:12px; background:rgba(0,0,0,0.3); border:1px solid var(--border); border-radius:6px; padding:8px 12px; font-size:11px; font-family:'Courier New',monospace; color:#7dd3fc; text-align:center; overflow-x:auto; white-space:nowrap; }
 
-.bg-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-start; }
-.bg-mode-group { display: flex; gap: 4px; align-items: center; }
-.bg-mode-btn {
-  height: 28px; padding: 0 12px; border-radius: 5px; border: 1px solid var(--border);
-  background: transparent; color: var(--muted); font-family: inherit;
-  font-size: 11px; font-weight: 500; cursor: pointer; transition: all 0.15s;
-}
-.bg-mode-btn:hover { color: var(--text); border-color: rgba(255,255,255,0.2); }
-.bg-mode-btn.active { background: rgba(245,200,66,0.12); border-color: rgba(245,200,66,0.35); color: var(--gold); font-weight: 700; }
-.bg-control { display: none; align-items: center; gap: 10px; flex-wrap: wrap; }
-.bg-control.show { display: flex; }
-.color-swatch { width: 32px; height: 28px; border-radius: 5px; border: 1px solid var(--border); padding: 2px; background: transparent; cursor: pointer; }
-.range-group { display: flex; align-items: center; gap: 6px; }
-.range-group label { font-size: 11px; color: var(--muted); }
-.range-group input[type=range] { width: 90px; accent-color: var(--gold); cursor: pointer; }
-.range-val { font-size: 11px; font-weight: 700; color: var(--gold); min-width: 34px; }
-.bg-size-sel {
-  height: 28px; padding: 0 8px; border-radius: 5px; border: 1px solid var(--border);
-  background: var(--surface); color: var(--text); font-family: inherit;
-  font-size: 11px; cursor: pointer; outline: none;
-}
-.bg-size-sel option { background: #1a3658; }
-.bg-img-preview { width: 40px; height: 28px; object-fit: cover; border-radius: 4px; border: 1px solid rgba(245,200,66,0.3); display: none; }
-.btn-sm-danger {
-  height: 26px; padding: 0 10px; border-radius: 4px;
-  border: 1px solid rgba(239,68,68,0.25); background: rgba(239,68,68,0.08);
-  color: #f87171; font-family: inherit; font-size: 11px;
-  cursor: pointer; transition: all 0.15s;
-}
-.btn-sm-danger:hover { background: rgba(239,68,68,0.18); border-color: var(--red); }
-
-.edit-footer {
-  display: flex; align-items: center; gap: 10px;
-  padding-top: 12px; border-top: 1px solid var(--border); flex-wrap: wrap;
-}
-.applied-badge {
-  display: none; font-size: 10px; font-weight: 700;
-  background: rgba(34,197,94,0.15); color: #4ade80;
-  border: 1px solid rgba(34,197,94,0.25); border-radius: 20px; padding: 3px 10px;
-}
-.edit-hint { font-size: 11px; color: rgba(255,255,255,0.25); font-style: italic; }
-
-#preview-area { padding: 24px; background: #0d1f35; min-height: calc(100vh - 56px); }
-
-#placeholder { max-width: 600px; margin: 40px auto; text-align: center; }
-#placeholder .ph-icon { font-size: 48px; margin-bottom: 16px; }
-#placeholder h2 { font-size: 22px; font-weight: 700; color: white; margin-bottom: 8px; }
-#placeholder .ph-sub { font-size: 14px; color: var(--muted); margin-bottom: 28px; }
-.steps-card {
-  background: var(--navy2); border: 1px solid var(--border);
-  border-radius: 12px; padding: 20px 24px; text-align: left;
-}
-.step-item {
-  display: flex; align-items: flex-start; gap: 12px;
-  padding: 8px 0; border-bottom: 1px solid var(--border);
-}
-.step-item:last-child { border-bottom: none; }
-.step-num {
-  width: 24px; height: 24px; border-radius: 50%;
-  background: rgba(245,200,66,0.12); border: 1px solid rgba(245,200,66,0.25);
-  color: var(--gold); font-size: 11px; font-weight: 700;
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0; margin-top: 1px;
-}
-.step-text { font-size: 13px; color: var(--text); line-height: 1.6; }
-.step-text strong { color: white; }
-.ph-code {
-  margin-top: 16px; background: rgba(0,0,0,0.3);
-  border: 1px solid var(--border); border-radius: 6px; padding: 10px 14px;
-  font-size: 12px; font-family: 'Courier New', monospace; color: #7dd3fc; text-align: center;
+/* ── A4 ── */
+.a4-scaler { overflow-x:auto; -webkit-overflow-scrolling:touch; }
+.page-a4 { width:210mm; min-height:297mm; background:white; margin:0 auto 16px auto; padding:8mm; display:grid; grid-template-columns:1fr 1fr; grid-template-rows:repeat(4,1fr); gap:4mm; box-shadow:0 4px 24px rgba(0,0,0,0.4); border-radius:2px; }
+@media(max-width:800px) {
+  .a4-scaler { display:flex; justify-content:flex-start; }
+  .page-a4 { transform-origin:top left; flex-shrink:0; }
 }
 
-.page-a4 {
-  width: 210mm; min-height: 297mm; background: white;
-  margin: 0 auto 20px auto; padding: 8mm;
-  display: grid; grid-template-columns: 1fr 1fr;
-  grid-template-rows: repeat(4, 1fr); gap: 4mm;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.4); border-radius: 2px;
+/* ── KARTU ── */
+.kartu { border:2px solid #000; padding:0; position:relative; overflow:hidden; display:flex; flex-direction:column; min-height:66mm; color:#000; }
+.kartu * { color:#000 !important; }
+.kartu-bg { position:absolute; top:0; left:0; right:0; bottom:0; z-index:0; background-size:cover; background-position:center; background-repeat:no-repeat; }
+.kartu-watermark { position:absolute; top:0; left:0; right:0; bottom:0; display:flex; flex-direction:column; justify-content:center; overflow:hidden; pointer-events:none; z-index:0; }
+.kartu-watermark.hidden { display:none !important; }
+.kartu-watermark span { color:rgba(0,128,0,0.15) !important; font-size:8.5px; font-weight:bold; white-space:nowrap; line-height:1.6; letter-spacing:0.5px; }
+.kartu-header { display:flex; align-items:center; padding:3mm 3mm 2mm 3mm; border-bottom:1.5px solid #000; background:white; position:relative; z-index:1; gap:6px; }
+.logo-placeholder { width:28px; height:28px; border:1px solid #ccc; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:6px; color:#888 !important; text-align:center; flex-shrink:0; font-family:'Times New Roman',serif; }
+.header-text { flex:1; text-align:center; line-height:1.3; font-family:'Times New Roman',serif; }
+.title-asat   { font-size:7px; font-weight:bold; text-transform:uppercase; }
+.title-sekolah{ font-size:7.5px; font-weight:bold; text-transform:uppercase; }
+.title-tahun  { font-size:7px; font-weight:bold; }
+.kartu-judul { text-align:center; padding:2mm 0 1mm 0; position:relative; z-index:1; font-family:'Times New Roman',serif; }
+.kartu-judul span { font-size:11px; font-weight:bold; text-decoration:underline; letter-spacing:1px; }
+.kartu-ruang-row { display:flex; justify-content:flex-end; padding:0 3mm 1mm 3mm; position:relative; z-index:1; }
+.ruang-box { border:1.5px solid #000; padding:2px 8px; font-size:8px; font-weight:bold; background:white; min-width:50px; text-align:center; font-family:'Times New Roman',serif; }
+.ruang-label { font-size:8px; font-weight:bold; margin-right:4px; line-height:22px; font-family:'Times New Roman',serif; }
+.kartu-data { padding:1mm 3mm; flex:1; position:relative; z-index:1; }
+.data-row { display:flex; align-items:baseline; margin-bottom:1.5mm; font-size:8px; font-family:'Times New Roman',serif; }
+.data-label { width:26mm; font-weight:normal; flex-shrink:0; }
+.data-colon { width:4mm; flex-shrink:0; text-align:center; }
+.data-value { flex:1; font-weight:normal; border-bottom:0.5px solid #555; min-height:10px; padding-bottom:1px; }
+.kartu-footer { padding:1mm 3mm 2mm 3mm; position:relative; z-index:1; display:flex; justify-content:flex-end; flex-direction:column; align-items:flex-end; }
+.ttd-area { text-align:center; font-size:7.5px; font-family:'Times New Roman',serif; position:relative; }
+.ttd-tanggal { font-size:7.5px; margin-bottom:0.5mm; }
+.ttd-stamp-wrap { position:absolute; bottom:0; left:50%; transform:translateX(-50%); pointer-events:none; z-index:2; }
+.ttd-stamp-wrap img { object-fit:contain; display:block; }
+.ttd-stamp-wrap.hidden { display:none; }
+.ttd-spacer { display:block; height:10mm; }
+.ttd-nama { font-size:8px; font-weight:bold; text-decoration:underline; margin-top:0; }
+.ttd-nip  { font-size:7.5px; font-weight:bold; }
+
+/* ── RESPONSIVE ── */
+@media(max-width:700px) {
+  #toolbar { display:none; }
+  #logo-row { display:none; }
+  #bottom-nav { display:flex; }
+  #mobile-toolbar { display:flex; }
+  #preview-area { padding:12px 8px; padding-bottom:calc(56px + env(safe-area-inset-bottom,0px) + 12px); }
+  .edit-inner { padding:12px; }
 }
 
-.kartu {
-  border: 2px solid #000; padding: 0; position: relative;
-  overflow: hidden; display: flex; flex-direction: column; min-height: 66mm;
-  color: #000;
-}
-.kartu * { color: #000 !important; }
-.kartu-bg {
-  position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-  z-index: 0; background-size: cover; background-position: center; background-repeat: no-repeat;
-}
-.kartu-watermark {
-  position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-  display: flex; flex-direction: column; justify-content: center;
-  overflow: hidden; pointer-events: none; z-index: 0;
-}
-.kartu-watermark.hidden { display: none !important; }
-.kartu-watermark span {
-  color: rgba(0,128,0,0.15) !important; font-size: 8.5px; font-weight: bold;
-  white-space: nowrap; line-height: 1.6; letter-spacing: 0.5px;
-}
-.kartu-header {
-  display: flex; align-items: center; padding: 3mm 3mm 2mm 3mm;
-  border-bottom: 1.5px solid #000; background: white;
-  position: relative; z-index: 1; gap: 6px;
-}
-.logo-placeholder {
-  width: 28px; height: 28px; border: 1px solid #ccc; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 6px; color: #888 !important; text-align: center; flex-shrink: 0;
-  font-family: 'Times New Roman', serif;
-}
-.header-text { flex: 1; text-align: center; line-height: 1.3; font-family: 'Times New Roman', serif; }
-.title-asat   { font-size: 7px; font-weight: bold; text-transform: uppercase; color: #000 !important; }
-.title-sekolah{ font-size: 7.5px; font-weight: bold; text-transform: uppercase; color: #000 !important; }
-.title-tahun  { font-size: 7px; font-weight: bold; color: #000 !important; }
-.kartu-judul {
-  text-align: center; padding: 2mm 0 1mm 0;
-  position: relative; z-index: 1; font-family: 'Times New Roman', serif;
-}
-.kartu-judul span { font-size: 11px; font-weight: bold; text-decoration: underline; letter-spacing: 1px; color: #000 !important; }
-.kartu-ruang-row {
-  display: flex; justify-content: flex-end; padding: 0 3mm 1mm 3mm;
-  position: relative; z-index: 1;
-}
-.ruang-box {
-  border: 1.5px solid #000; padding: 2px 8px; font-size: 8px; font-weight: bold;
-  background: white; min-width: 50px; text-align: center; font-family: 'Times New Roman', serif;
-  color: #000 !important;
-}
-.ruang-label { font-size: 8px; font-weight: bold; margin-right: 4px; line-height: 22px; font-family: 'Times New Roman', serif; color: #000 !important; }
-.kartu-data { padding: 1mm 3mm; flex: 1; position: relative; z-index: 1; }
-.data-row { display: flex; align-items: baseline; margin-bottom: 1.5mm; font-size: 8px; font-family: 'Times New Roman', serif; color: #000 !important; }
-.data-label { width: 26mm; font-weight: normal; flex-shrink: 0; color: #000 !important; }
-.data-colon { width: 4mm; flex-shrink: 0; text-align: center; color: #000 !important; }
-.data-value { flex: 1; font-weight: normal; border-bottom: 0.5px solid #555; min-height: 10px; padding-bottom: 1px; color: #000 !important; }
-
-.kartu-footer {
-  padding: 1mm 3mm 2mm 3mm; position: relative; z-index: 1;
-  display: flex; justify-content: flex-end; flex-direction: column; align-items: flex-end;
-}
-
-.ttd-area {
-  text-align: center;
-  font-size: 7.5px;
-  font-family: 'Times New Roman', serif;
-  color: #000 !important;
-  position: relative;
-}
-.ttd-tanggal { font-size: 7.5px; margin-bottom: 0.5mm; color: #000 !important; }
-
-.ttd-stamp-wrap {
-  position: absolute;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  pointer-events: none;
-  z-index: 2;
-}
-.ttd-stamp-wrap img {
-  object-fit: contain;
-  display: block;
-}
-.ttd-stamp-wrap.hidden { display: none; }
-
-.ttd-spacer {
-  display: block;
-  height: 10mm;
-}
-
-.ttd-nama { font-size: 8px; font-weight: bold; text-decoration: underline; margin-top: 0; color: #000 !important; }
-.ttd-nip  { font-size: 7.5px; font-weight: bold; color: #000 !important; }
-
+/* ── PRINT ── */
 @media print {
-  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-  #app-header, #toolbar, #logo-row, #edit-panel, #pdf-overlay { display: none !important; }
-  body { background: white; }
-  #preview-area { padding: 0; background: white; }
-  .page-a4 { margin: 0; box-shadow: none; page-break-after: always; width: 210mm; min-height: 297mm; border-radius: 0; }
-  #placeholder { display: none !important; }
+  * { -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  #app-header,#toolbar,#logo-row,#edit-panel,#pdf-overlay,#bottom-nav,#mobile-toolbar,#sheet-modal,#more-modal { display:none !important; }
+  body { background:white; }
+  #preview-area { padding:0; background:white; }
+  .page-a4 { margin:0; box-shadow:none; page-break-after:always; width:210mm; min-height:297mm; border-radius:0; transform:none !important; }
+  .a4-scaler { overflow:visible; }
+  #placeholder { display:none !important; }
 }
 </style>
 </head>
 <body>
 
-<!-- PDF Progress Overlay -->
+<!-- PDF Overlay -->
 <div id="pdf-overlay">
   <div class="pdf-box">
     <div class="pdf-icon">📄</div>
     <div class="pdf-title">Membuat PDF...</div>
     <div class="pdf-sub" id="pdf-overlay-sub">Memproses halaman kartu peserta</div>
-    <div id="pdf-progress-bar-wrap">
-      <div id="pdf-progress-bar"></div>
-    </div>
+    <div id="pdf-progress-bar-wrap"><div id="pdf-progress-bar"></div></div>
     <div id="pdf-progress-text">0%</div>
   </div>
 </div>
 
+<!-- Sheet Modal -->
+<div id="sheet-modal">
+  <div class="sheet-modal-box">
+    <div class="modal-header">
+      <h3>📋 Pilih Sheet</h3>
+      <button class="modal-close" onclick="closeSheetModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <select id="sheetSelectMobile"><option value="">— pilih sheet —</option></select>
+      <div class="mb-row">
+        <button class="mb-btn btn-gold" onclick="loadSheetMobile()">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><polygon points="4,2 14,8 4,14"/></svg>
+          Load Sheet
+        </button>
+        <button class="mb-btn btn-outline" onclick="loadAllSheetsMobile()">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="12" height="2" rx="1"/><rect x="2" y="7" width="12" height="2" rx="1"/><rect x="2" y="11" width="12" height="2" rx="1"/></svg>
+          Semua Kelas
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- More Modal (mobile) -->
+<div id="more-modal">
+  <div class="more-modal-box">
+    <div class="modal-header">
+      <h3>⚙️ Lainnya</h3>
+      <button class="modal-close" onclick="closeMoreModal()">✕</button>
+    </div>
+    <div class="more-grid">
+      <button class="mb-btn btn-purple" onclick="downloadTemplate();closeMoreModal()">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 2v8M5 8l3 3 3-3M3 13h10"/></svg>
+        Unduh Templat
+      </button>
+      <button class="mb-btn btn-green" onclick="window.print();closeMoreModal()">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6V2h8v4M4 11H3a1 1 0 01-1-1V7a1 1 0 011-1h10a1 1 0 011 1v3a1 1 0 01-1 1h-1M4 11v3h8v-3H4z"/></svg>
+        Cetak
+      </button>
+      <button class="mb-btn btn-teal" onclick="openLogoPanel();closeMoreModal()">
+        🖼 Upload Logo
+      </button>
+      <button class="mb-btn btn-red" onclick="clearAll();closeMoreModal()">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="3" x2="13" y2="13"/><line x1="13" y1="3" x2="3" y2="13"/></svg>
+        Clear Data
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Header -->
 <div id="app-header">
   <div class="app-logo">🎓</div>
   <h1>Generator Kartu Peserta</h1>
-  <div class="header-sep"></div>
-  <div id="status-bar">Siap — upload spreadsheet untuk mulai.</div>
+  <div id="status-chip">Siap</div>
 </div>
 
+<!-- Mobile Toolbar -->
+<div id="mobile-toolbar">
+  <label class="upload-pill" for="fileInput" style="width:100%;height:46px;border-radius:8px;justify-content:center;">
+    <div class="pill-icon">📂</div>
+    <span id="fileLabelMobile">Upload Spreadsheet (.xlsx / .csv)</span>
+  </label>
+</div>
+
+<!-- Desktop Toolbar -->
 <div id="toolbar">
-  <label class="upload-pill" for="fileInput" title="Upload .xlsx atau .csv">
+  <label class="upload-pill" for="fileInput">
     <div class="pill-icon">📂</div>
     <span id="fileLabel">Upload Spreadsheet</span>
   </label>
   <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" style="display:none">
-
-  <select id="sheetSelect" title="Pilih sheet">
-    <option value="">— pilih sheet —</option>
-  </select>
-
+  <select id="sheetSelect"><option value="">— pilih sheet —</option></select>
   <button class="tb-btn btn-gold" onclick="loadSheet()">
     <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><polygon points="4,2 14,8 4,14"/></svg>
     Load Sheet
@@ -493,84 +341,71 @@ body {
     <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="12" height="2" rx="1"/><rect x="2" y="7" width="12" height="2" rx="1"/><rect x="2" y="11" width="12" height="2" rx="1"/></svg>
     Semua Kelas
   </button>
-
   <div class="tb-sep"></div>
-
   <button class="tb-btn btn-purple" onclick="downloadTemplate()">
     <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 2v8M5 8l3 3 3-3M3 13h10"/></svg>
     Unduh Templat
   </button>
-
   <button class="tb-btn btn-green" onclick="window.print()">
     <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6V2h8v4M4 11H3a1 1 0 01-1-1V7a1 1 0 011-1h10a1 1 0 011 1v3a1 1 0 01-1 1h-1M4 11v3h8v-3H4z"/></svg>
     Cetak
   </button>
-
   <button class="tb-btn btn-pdf" id="btnDownloadPdf" onclick="downloadPDF()">
-    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
-      <rect x="2" y="1" width="9" height="12" rx="1"/>
-      <path d="M7 1l4 4H7V1z"/>
-      <path d="M4 9h5M4 11h3"/>
-      <path d="M10 10l2 2 2-2M12 8v4"/>
-    </svg>
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="1" width="9" height="12" rx="1"/><path d="M7 1l4 4H7V1z"/><path d="M4 9h5M4 11h3"/><path d="M10 10l2 2 2-2M12 8v4"/></svg>
     Download PDF
   </button>
-
   <button class="tb-btn btn-red" onclick="clearAll()">
     <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="3" x2="13" y2="13"/><line x1="13" y1="3" x2="3" y2="13"/></svg>
     Clear
   </button>
-
   <div class="tb-sep"></div>
-
   <button class="tb-btn btn-ghost-gold" id="editToggleBtn" onclick="toggleEditPanel()">
     <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 2l3 3-8 8H3v-3l8-8z"/></svg>
     Edit Kop &amp; TTD
-    <svg id="chevron" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" style="margin-left:2px;transition:transform 0.3s"><polyline points="4,6 8,10 12,6"/></svg>
+    <svg id="chevron" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" style="transition:transform 0.3s"><polyline points="4,6 8,10 12,6"/></svg>
   </button>
 </div>
 
+<!-- Logo Row -->
 <div id="logo-row">
   <div class="logo-slot">
     <img id="thumbKab" class="logo-thumb" src="" alt="">
     <span class="logo-slot-label">🏛 Logo Kab</span>
     <button class="logo-upload-btn" onclick="document.getElementById('logoKabInput').click()">Pilih Gambar</button>
     <input type="file" id="logoKabInput" accept="image/*" style="display:none" onchange="handleLogoUpload('kab',this)">
-    <button class="logo-clear" id="clearKabBtn" onclick="clearLogo('kab')" title="Hapus">✕</button>
+    <button class="logo-clear" id="clearKabBtn" onclick="clearLogo('kab')">✕</button>
   </div>
   <div class="logo-slot">
     <img id="thumbSmp" class="logo-thumb" src="" alt="">
     <span class="logo-slot-label">🏫 Logo Sekolah</span>
     <button class="logo-upload-btn" onclick="document.getElementById('logoSmpInput').click()">Pilih Gambar</button>
     <input type="file" id="logoSmpInput" accept="image/*" style="display:none" onchange="handleLogoUpload('smp',this)">
-    <button class="logo-clear" id="clearSmpBtn" onclick="clearLogo('smp')" title="Hapus">✕</button>
+    <button class="logo-clear" id="clearSmpBtn" onclick="clearLogo('smp')">✕</button>
   </div>
-  <span style="font-size:11px;color:var(--muted);font-style:italic;margin-left:4px;">Logo diterapkan otomatis ke semua kartu</span>
 </div>
 
+<!-- Edit Panel -->
 <div id="edit-panel">
   <div class="edit-inner">
-
     <div class="edit-section">
       <div class="edit-section-title">Kop / Header Kartu</div>
       <div class="edit-grid">
         <div class="field"><label>Baris 1 — Nama Ujian</label><input type="text" id="edit_namaUjian" value="ASESMEN SUMATIF AKHIR TAHUN"></div>
-        <div class="field"><label>Baris 2 — Nama Sekolah (HURUF BESAR)</label><input type="text" id="edit_namaSekolah" value="SMP NEGERI 1 CIKALONGKULON"></div>
+        <div class="field"><label>Baris 2 — Nama Sekolah</label><input type="text" id="edit_namaSekolah" value="SMP NEGERI 1 CIKALONGKULON"></div>
         <div class="field"><label>Baris 3 — Tahun Pelajaran</label><input type="text" id="edit_tahunPelajaran" value="TAHUN PELAJARAN 2025 / 2026"></div>
         <div class="field"><label>Nama Sekolah di Badan Kartu</label><input type="text" id="edit_namaSekolahBadan" value="SMP Negeri 1 Cikalongkulon"></div>
-        <div class="field" style="grid-column: 1 / -1;">
+        <div class="field" style="grid-column:1/-1;">
           <label>Teks Watermark</label>
           <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-            <input type="text" id="edit_watermark" value="ASESMEN SUMATIF AKHIR TAHUN SMP NEGERI 1 CIKALONG KULON" style="flex:1;min-width:200px;" oninput="applyWatermarkText()">
-            <label style="display:flex;align-items:center;gap:6px;cursor:pointer;white-space:nowrap;padding:0 4px;">
-              <input type="checkbox" id="edit_showWatermark" onchange="toggleWatermark()" style="width:15px;height:15px;accent-color:var(--gold);cursor:pointer;">
-              <span style="font-size:11px;color:var(--muted);">Tampilkan</span>
+            <input type="text" id="edit_watermark" value="ASESMEN SUMATIF AKHIR TAHUN SMP NEGERI 1 CIKALONG KULON" style="flex:1;min-width:180px;" oninput="applyWatermarkText()">
+            <label style="display:flex;align-items:center;gap:6px;cursor:pointer;white-space:nowrap;padding:4px;">
+              <input type="checkbox" id="edit_showWatermark" onchange="toggleWatermark()" style="width:16px;height:16px;accent-color:var(--gold);cursor:pointer;">
+              <span style="font-size:12px;color:var(--muted);">Tampilkan</span>
             </label>
           </div>
         </div>
       </div>
     </div>
-
     <div class="edit-section">
       <div class="edit-section-title">Tanda Tangan &amp; Titi Mangsa</div>
       <div class="edit-grid">
@@ -581,17 +416,16 @@ body {
         <div class="field"><label>NIP</label><input type="text" id="edit_nipKepsek" value="19700428200604004"></div>
       </div>
     </div>
-
     <div class="edit-section">
-      <div class="edit-section-title">Cap &amp; Tanda Tangan Kepala Sekolah</div>
+      <div class="edit-section-title">Cap &amp; Tanda Tangan</div>
       <div class="stamp-slot">
-        <div class="stamp-preview-wrap" id="stampPreviewWrap">
-          <img id="stampThumb" src="" alt="Preview cap/ttd">
+        <div class="stamp-preview-wrap">
+          <img id="stampThumb" src="" alt="">
           <div class="stamp-placeholder-text" id="stampPlaceholder">Belum ada<br>gambar</div>
         </div>
         <div class="stamp-controls">
-          <span class="logo-slot-label">🖋 Gambar Cap / Tanda Tangan</span>
-          <small>Gunakan PNG transparan agar tampak alami di atas kartu.<br>Gambar akan <strong>melayang di atas</strong> nama kepala sekolah.</small>
+          <span class="logo-slot-label">🖋 Gambar Cap / TTD</span>
+          <small>PNG transparan disarankan.</small>
           <div class="stamp-btn-row">
             <button class="stamp-upload-btn" onclick="document.getElementById('stampInput').click()">📁 Pilih Gambar</button>
             <input type="file" id="stampInput" accept="image/*" style="display:none" onchange="handleStampUpload(this)">
@@ -601,7 +435,9 @@ body {
             <label>Ukuran</label>
             <input type="range" id="stampSizeRange" min="10" max="36" value="20" step="1" oninput="onStampSizeChange()">
             <span class="stamp-size-val" id="stampSizeVal">20 mm</span>
-            <label style="margin-left:6px;">Opasitas</label>
+          </div>
+          <div class="stamp-size-row">
+            <label>Opasitas</label>
             <input type="range" id="stampOpacityRange" min="20" max="100" value="90" step="1" oninput="onStampOpacityChange()">
             <span class="stamp-size-val" id="stampOpacityVal">90%</span>
           </div>
@@ -609,17 +445,15 @@ body {
             <label>Geser Vertikal</label>
             <input type="range" id="stampOffsetRange" min="-20" max="10" value="0" step="1" oninput="onStampOffsetChange()">
             <span class="stamp-size-val" id="stampOffsetVal">0 mm</span>
-            <label style="margin-left:6px;">Geser Horizontal</label>
+          </div>
+          <div class="stamp-size-row">
+            <label>Geser Horizontal</label>
             <input type="range" id="stampOffsetXRange" min="-30" max="30" value="0" step="1" oninput="onStampOffsetXChange()">
             <span class="stamp-size-val" id="stampOffsetXVal">0 mm</span>
           </div>
         </div>
       </div>
-      <div style="font-size:11px;color:rgba(255,255,255,0.25);margin-top:8px;font-style:italic;">
-        Tip: scan tanda tangan di kertas putih, lalu hapus background putihnya menggunakan remove.bg sebelum diupload.
-      </div>
     </div>
-
     <div class="edit-section">
       <div class="edit-section-title">Background Kartu</div>
       <div class="bg-row">
@@ -655,35 +489,51 @@ body {
           <button class="btn-sm-danger" onclick="clearBg()">✕ Hapus</button>
         </div>
       </div>
-      <div style="font-size:11px;color:rgba(255,255,255,0.25);margin-top:8px;font-style:italic;">Gunakan opacity rendah (10–30%) agar teks tetap terbaca.</div>
     </div>
-
     <div class="edit-footer">
       <button class="tb-btn btn-teal" onclick="applyEdits()">
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="2,8 6,12 14,4"/></svg>
         Terapkan
       </button>
-      <button class="tb-btn btn-outline" onclick="resetEdits()">↺ Reset Default</button>
+      <button class="tb-btn btn-outline" onclick="resetEdits()">↺ Reset</button>
       <span class="applied-badge" id="appliedBadge">✓ Diterapkan!</span>
-      <span class="edit-hint">Perubahan langsung diterapkan ke seluruh kartu.</span>
     </div>
-
   </div>
 </div>
 
+<!-- Bottom Nav -->
+<div id="bottom-nav">
+  <button class="bnav-btn" onclick="document.getElementById('fileInput').click()">
+    <span class="bico">📂</span>Upload
+  </button>
+  <button class="bnav-btn" id="bnav-sheet" onclick="openSheetModal()" disabled>
+    <span class="bico">📋</span>Sheet
+  </button>
+  <button class="bnav-btn" id="bnav-edit" onclick="toggleEditPanel()">
+    <span class="bico">✏️</span>Edit
+  </button>
+  <button class="bnav-btn" id="bnav-pdf" onclick="downloadPDF()" disabled>
+    <span class="bico">⬇️</span>PDF
+  </button>
+  <button class="bnav-btn" onclick="openMoreModal()">
+    <span class="bico">⚙️</span>Lainnya
+  </button>
+</div>
+
+<!-- Preview -->
 <div id="preview-area">
   <div id="placeholder">
     <div class="ph-icon">📄</div>
     <h2>Kartu Peserta Ujian</h2>
     <p class="ph-sub">Upload file Excel atau CSV untuk mulai membuat kartu peserta.</p>
     <div class="steps-card">
-      <div class="step-item"><div class="step-num">1</div><div class="step-text">Klik <strong>"Upload Spreadsheet"</strong> di toolbar atas, pilih file <strong>.xlsx</strong> atau <strong>.csv</strong></div></div>
-      <div class="step-item"><div class="step-num">2</div><div class="step-text">Pilih sheet lalu klik <strong>"Load Sheet"</strong> — atau <strong>"Semua Kelas"</strong> untuk load sekaligus</div></div>
-      <div class="step-item"><div class="step-num">3</div><div class="step-text">Kartu tersusun otomatis <strong>8 per halaman A4</strong> (2 kolom × 4 baris)</div></div>
-      <div class="step-item"><div class="step-num">4</div><div class="step-text">Klik <strong>"Edit Kop &amp; TTD"</strong> → unggah cap &amp; tanda tangan, atur posisi dengan slider</div></div>
-      <div class="step-item"><div class="step-num">5</div><div class="step-text">Klik <strong>"Cetak"</strong> untuk cetak langsung, atau <strong>"Download PDF"</strong> untuk simpan file PDF</div></div>
+      <div class="step-item"><div class="step-num">1</div><div class="step-text">Tap <strong>📂 Upload</strong> → pilih file <strong>.xlsx</strong> atau <strong>.csv</strong></div></div>
+      <div class="step-item"><div class="step-num">2</div><div class="step-text">Tap <strong>📋 Sheet</strong> → pilih sheet lalu <strong>Load</strong></div></div>
+      <div class="step-item"><div class="step-num">3</div><div class="step-text">Kartu tersusun otomatis <strong>8 per halaman A4</strong> (2×4)</div></div>
+      <div class="step-item"><div class="step-num">4</div><div class="step-text">Tap <strong>✏️ Edit</strong> → atur kop, cap, tanda tangan</div></div>
+      <div class="step-item"><div class="step-num">5</div><div class="step-text">Tap <strong>⬇️ PDF</strong> untuk download atau gunakan Share browser</div></div>
     </div>
-    <div class="ph-code">Header: ruang &nbsp;|&nbsp; nama &nbsp;|&nbsp; kelas &nbsp;|&nbsp; nis_nisn &nbsp;|&nbsp; no_peserta</div>
+    <div class="ph-code">ruang | nama | kelas | nis_nisn | no_peserta</div>
   </div>
 </div>
 
@@ -691,410 +541,376 @@ body {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
-let workbook = null, logoKabSrc = null, logoSmpSrc = null;
-let stampSrc = null, stampSizeMm = 20, stampOpacity = 90, stampOffsetMm = 0, stampOffsetXMm = 0;
-let bgState = { mode:'none', color:'#e8f4f8', colorOpacity:30, imageSrc:null, imageOpacity:20, imageSize:'cover' };
+let workbook=null, logoKabSrc=null, logoSmpSrc=null;
+let stampSrc=null, stampSizeMm=20, stampOpacity=90, stampOffsetMm=0, stampOffsetXMm=0;
+let bgState={mode:'none',color:'#e8f4f8',colorOpacity:30,imageSrc:null,imageOpacity:20,imageSize:'cover'};
+let showWatermark=false;
 
-const CONFIG_DEFAULTS = {
-  namaUjian:'ASESMEN SUMATIF AKHIR TAHUN', namaSekolah:'SMP NEGERI 1 CIKALONGKULON',
-  tahunPelajaran:'TAHUN PELAJARAN 2025 / 2026', namaSekolahBadan:'SMP Negeri 1 Cikalongkulon',
+const CONFIG_DEFAULTS={
+  namaUjian:'ASESMEN SUMATIF AKHIR TAHUN',namaSekolah:'SMP NEGERI 1 CIKALONGKULON',
+  tahunPelajaran:'TAHUN PELAJARAN 2025 / 2026',namaSekolahBadan:'SMP Negeri 1 Cikalongkulon',
   watermark:'ASESMEN SUMATIF AKHIR TAHUN SMP NEGERI 1 CIKALONG KULON',
-  tempatTtd:'Cikalongkulon', tanggalTtd:'1 Juni 2026',
-  jabatanKepsek:'Kepala Sekolah', namaKepsek:'Dedi Suhendri, S.Pd., M.M.',
+  tempatTtd:'Cikalongkulon',tanggalTtd:'1 Juni 2026',
+  jabatanKepsek:'Kepala Sekolah',namaKepsek:'Dedi Suhendri, S.Pd., M.M.',
   nipKepsek:'Nip. 19700428200604004'
 };
-let config = { ...CONFIG_DEFAULTS };
+let config={...CONFIG_DEFAULTS};
 
-function setStatus(msg, type='') {
-  const el = document.getElementById('status-bar');
-  el.textContent = msg; el.className = type;
+/* ── A4 SCALING ── */
+function scaleA4Pages(){
+  const isMobile=window.innerWidth<=800;
+  if(!isMobile){
+    document.querySelectorAll('.page-a4').forEach(p=>{p.style.transform='';p.style.marginBottom='';});
+    return;
+  }
+  const A4_PX=210*3.7795;
+  const containerW=Math.min(window.innerWidth,500)-16;
+  const scale=containerW/A4_PX;
+  const A4_H_PX=297*3.7795;
+  document.querySelectorAll('.page-a4').forEach(page=>{
+    page.style.transform=`scale(${scale})`;
+    page.style.marginBottom=`${(A4_H_PX*scale)-A4_H_PX+8}px`;
+  });
+}
+window.addEventListener('resize',scaleA4Pages);
+
+/* ── STATUS ── */
+function setStatus(msg,type=''){
+  const el=document.getElementById('status-chip');
+  el.textContent=msg; el.className=type;
 }
 
-function toggleEditPanel() {
-  const panel = document.getElementById('edit-panel');
-  const btn = document.getElementById('editToggleBtn');
-  const chevron = document.getElementById('chevron');
-  const isOpen = panel.classList.toggle('open');
-  btn.classList.toggle('active', isOpen);
-  chevron.style.transform = isOpen ? 'rotate(180deg)' : '';
+/* ── MODALS ── */
+function openSheetModal(){ document.getElementById('sheet-modal').classList.add('show'); }
+function closeSheetModal(){ document.getElementById('sheet-modal').classList.remove('show'); }
+function openMoreModal(){ document.getElementById('more-modal').classList.add('show'); }
+function closeMoreModal(){ document.getElementById('more-modal').classList.remove('show'); }
+
+document.getElementById('sheet-modal').addEventListener('click',e=>{ if(e.target===e.currentTarget) closeSheetModal(); });
+document.getElementById('more-modal').addEventListener('click',e=>{ if(e.target===e.currentTarget) closeMoreModal(); });
+
+function loadSheetMobile(){
+  document.getElementById('sheetSelect').value=document.getElementById('sheetSelectMobile').value;
+  closeSheetModal(); loadSheet();
+}
+function loadAllSheetsMobile(){ closeSheetModal(); loadAllSheets(); }
+
+function openLogoPanel(){
+  const panel=document.getElementById('edit-panel');
+  if(!panel.classList.contains('open')){
+    panel.classList.add('open');
+    document.getElementById('editToggleBtn').classList.add('active');
+    document.getElementById('chevron').style.transform='rotate(180deg)';
+  }
+  setTimeout(()=>{ const el=document.querySelector('.stamp-slot'); if(el) el.scrollIntoView({behavior:'smooth',block:'start'}); },400);
+}
+
+/* ── EDIT PANEL ── */
+function toggleEditPanel(){
+  const panel=document.getElementById('edit-panel');
+  const isOpen=panel.classList.toggle('open');
+  document.getElementById('editToggleBtn').classList.toggle('active',isOpen);
+  document.getElementById('chevron').style.transform=isOpen?'rotate(180deg)':'';
 }
 
 /* ── STAMP ── */
-function handleStampUpload(input) {
-  const file = input.files[0]; if (!file) return;
-  const reader = new FileReader();
-  reader.onload = e => {
-    stampSrc = e.target.result;
-    const img = document.getElementById('stampThumb');
-    img.src = stampSrc; img.style.display = 'block';
-    document.getElementById('stampPlaceholder').style.display = 'none';
-    document.getElementById('stampClearBtn').style.display = 'inline-block';
-    refreshStampInCards();
-    setStatus('✓ Cap/tanda tangan diupload.','ok');
+function handleStampUpload(input){
+  const file=input.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    stampSrc=e.target.result;
+    document.getElementById('stampThumb').src=stampSrc;
+    document.getElementById('stampThumb').style.display='block';
+    document.getElementById('stampPlaceholder').style.display='none';
+    document.getElementById('stampClearBtn').style.display='inline-block';
+    refreshStampInCards(); setStatus('✓ Cap diupload','ok');
   };
   reader.readAsDataURL(file);
 }
-
-function clearStamp() {
-  stampSrc = null;
-  document.getElementById('stampInput').value = '';
-  const img = document.getElementById('stampThumb');
-  img.src = ''; img.style.display = 'none';
-  document.getElementById('stampPlaceholder').style.display = '';
-  document.getElementById('stampClearBtn').style.display = 'none';
-  refreshStampInCards();
-  setStatus('Cap/tanda tangan dihapus.');
-}
-
-function onStampSizeChange() {
-  stampSizeMm = parseInt(document.getElementById('stampSizeRange').value);
-  document.getElementById('stampSizeVal').textContent = stampSizeMm + ' mm';
+function clearStamp(){
+  stampSrc=null;
+  document.getElementById('stampInput').value='';
+  document.getElementById('stampThumb').style.display='none';
+  document.getElementById('stampPlaceholder').style.display='';
+  document.getElementById('stampClearBtn').style.display='none';
   refreshStampInCards();
 }
-function onStampOpacityChange() {
-  stampOpacity = parseInt(document.getElementById('stampOpacityRange').value);
-  document.getElementById('stampOpacityVal').textContent = stampOpacity + '%';
-  refreshStampInCards();
-}
-function onStampOffsetChange() {
-  stampOffsetMm = parseInt(document.getElementById('stampOffsetRange').value);
-  document.getElementById('stampOffsetVal').textContent = stampOffsetMm + ' mm';
-  refreshStampInCards();
-}
-function onStampOffsetXChange() {
-  stampOffsetXMm = parseInt(document.getElementById('stampOffsetXRange').value);
-  document.getElementById('stampOffsetXVal').textContent = stampOffsetXMm + ' mm';
-  refreshStampInCards();
-}
-
-function refreshStampInCards() {
-  document.querySelectorAll('.ttd-stamp-wrap').forEach(wrap => {
-    if (!stampSrc) { wrap.classList.add('hidden'); return; }
+function onStampSizeChange(){ stampSizeMm=parseInt(document.getElementById('stampSizeRange').value); document.getElementById('stampSizeVal').textContent=stampSizeMm+' mm'; refreshStampInCards(); }
+function onStampOpacityChange(){ stampOpacity=parseInt(document.getElementById('stampOpacityRange').value); document.getElementById('stampOpacityVal').textContent=stampOpacity+'%'; refreshStampInCards(); }
+function onStampOffsetChange(){ stampOffsetMm=parseInt(document.getElementById('stampOffsetRange').value); document.getElementById('stampOffsetVal').textContent=stampOffsetMm+' mm'; refreshStampInCards(); }
+function onStampOffsetXChange(){ stampOffsetXMm=parseInt(document.getElementById('stampOffsetXRange').value); document.getElementById('stampOffsetXVal').textContent=stampOffsetXMm+' mm'; refreshStampInCards(); }
+function refreshStampInCards(){
+  document.querySelectorAll('.ttd-stamp-wrap').forEach(wrap=>{
+    if(!stampSrc){ wrap.classList.add('hidden'); return; }
     wrap.classList.remove('hidden');
-    const img = wrap.querySelector('img');
-    img.src = stampSrc;
-    img.style.width  = stampSizeMm + 'mm';
-    img.style.height = stampSizeMm + 'mm';
-    img.style.opacity = (stampOpacity / 100).toFixed(2);
-    wrap.style.bottom = (-stampOffsetMm) + 'mm';
-    wrap.style.left = '50%';
-    wrap.style.transform = `translateX(calc(-50% + ${stampOffsetXMm}mm))`;
+    const img=wrap.querySelector('img');
+    img.src=stampSrc; img.style.width=stampSizeMm+'mm'; img.style.height=stampSizeMm+'mm';
+    img.style.opacity=(stampOpacity/100).toFixed(2);
+    wrap.style.bottom=(-stampOffsetMm)+'mm';
+    wrap.style.left='50%';
+    wrap.style.transform=`translateX(calc(-50% + ${stampOffsetXMm}mm))`;
   });
 }
 
 /* ── WATERMARK ── */
-let showWatermark = false;
-function toggleWatermark() {
-  showWatermark = document.getElementById('edit_showWatermark').checked;
-  document.querySelectorAll('.kartu-watermark').forEach(el => {
-    el.classList.toggle('hidden', !showWatermark);
-  });
+function toggleWatermark(){
+  showWatermark=document.getElementById('edit_showWatermark').checked;
+  document.querySelectorAll('.kartu-watermark').forEach(el=>el.classList.toggle('hidden',!showWatermark));
 }
-function applyWatermarkText() {
-  const val = document.getElementById('edit_watermark').value.trim();
-  config.watermark = val || CONFIG_DEFAULTS.watermark;
-  const wmText = escHtml(config.watermark) + '&nbsp;&nbsp;&nbsp;';
-  document.querySelectorAll('.kartu-watermark').forEach(el => {
-    let html = '';
-    for (let i = 0; i < 14; i++) html += `<span>${wmText.repeat(3)}</span>`;
-    el.innerHTML = html;
-    el.classList.toggle('hidden', !showWatermark);
+function applyWatermarkText(){
+  const val=document.getElementById('edit_watermark').value.trim();
+  config.watermark=val||CONFIG_DEFAULTS.watermark;
+  const wmText=escHtml(config.watermark)+'&nbsp;&nbsp;&nbsp;';
+  document.querySelectorAll('.kartu-watermark').forEach(el=>{
+    let html=''; for(let i=0;i<14;i++) html+=`<span>${wmText.repeat(3)}</span>`;
+    el.innerHTML=html; el.classList.toggle('hidden',!showWatermark);
   });
 }
 
 /* ── BACKGROUND ── */
-function setBgMode(mode) {
-  bgState.mode = mode;
-  ['None','Color','Image'].forEach(m => {
-    document.getElementById('bgTab'+m).classList.toggle('active', m.toLowerCase() === mode);
-  });
-  document.getElementById('bgColorBlock').classList.toggle('show', mode === 'color');
-  document.getElementById('bgImageBlock').classList.toggle('show', mode === 'image');
-  if (mode === 'none') refreshBgInCards();
+function setBgMode(mode){
+  bgState.mode=mode;
+  ['None','Color','Image'].forEach(m=>document.getElementById('bgTab'+m).classList.toggle('active',m.toLowerCase()===mode));
+  document.getElementById('bgColorBlock').classList.toggle('show',mode==='color');
+  document.getElementById('bgImageBlock').classList.toggle('show',mode==='image');
+  if(mode==='none') refreshBgInCards();
 }
-
-function applyBgColor() {
-  bgState.color = document.getElementById('bgColorPicker').value;
-  bgState.colorOpacity = parseInt(document.getElementById('bgColorOpacity').value);
-  document.getElementById('bgColorOpacityVal').textContent = bgState.colorOpacity + '%';
+function applyBgColor(){
+  bgState.color=document.getElementById('bgColorPicker').value;
+  bgState.colorOpacity=parseInt(document.getElementById('bgColorOpacity').value);
+  document.getElementById('bgColorOpacityVal').textContent=bgState.colorOpacity+'%';
   refreshBgInCards();
 }
-
-function handleBgImageUpload(input) {
-  const file = input.files[0]; if (!file) return;
-  const reader = new FileReader();
-  reader.onload = e => {
-    bgState.imageSrc = e.target.result;
-    const thumb = document.getElementById('bgImgThumb');
-    thumb.src = e.target.result; thumb.style.display = 'inline-block';
+function handleBgImageUpload(input){
+  const file=input.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    bgState.imageSrc=e.target.result;
+    document.getElementById('bgImgThumb').src=e.target.result;
+    document.getElementById('bgImgThumb').style.display='inline-block';
     applyBgImage();
-    setStatus('✓ Gambar background diupload.','ok');
   };
   reader.readAsDataURL(file);
 }
-
-function applyBgImage() {
-  if (!bgState.imageSrc) return;
-  bgState.imageOpacity = parseInt(document.getElementById('bgImgOpacity').value);
-  bgState.imageSize = document.getElementById('bgSizeSelect').value;
-  document.getElementById('bgImgOpacityVal').textContent = bgState.imageOpacity + '%';
+function applyBgImage(){
+  if(!bgState.imageSrc) return;
+  bgState.imageOpacity=parseInt(document.getElementById('bgImgOpacity').value);
+  bgState.imageSize=document.getElementById('bgSizeSelect').value;
+  document.getElementById('bgImgOpacityVal').textContent=bgState.imageOpacity+'%';
   refreshBgInCards();
 }
-
-function clearBg() {
-  bgState.imageSrc = null;
-  document.getElementById('bgImgInput').value = '';
-  const thumb = document.getElementById('bgImgThumb');
-  thumb.src = ''; thumb.style.display = 'none';
+function clearBg(){
+  bgState.imageSrc=null;
+  document.getElementById('bgImgInput').value='';
+  document.getElementById('bgImgThumb').style.display='none';
   setBgMode('none');
-  setStatus('Background dihapus.');
 }
-
-function buildBgStyle() {
-  if (bgState.mode === 'none') return '';
-  if (bgState.mode === 'color') {
-    const h = bgState.color, op = (bgState.colorOpacity/100).toFixed(2);
-    const r = parseInt(h.slice(1,3),16), g = parseInt(h.slice(3,5),16), b = parseInt(h.slice(5,7),16);
+function buildBgStyle(){
+  if(bgState.mode==='none') return '';
+  if(bgState.mode==='color'){
+    const h=bgState.color,op=(bgState.colorOpacity/100).toFixed(2);
+    const r=parseInt(h.slice(1,3),16),g=parseInt(h.slice(3,5),16),b=parseInt(h.slice(5,7),16);
     return `background:rgba(${r},${g},${b},${op});`;
   }
-  if (bgState.mode === 'image' && bgState.imageSrc) {
-    const op = (bgState.imageOpacity/100).toFixed(2);
-    const sz = bgState.imageSize === 'repeat' ? 'auto' : bgState.imageSize;
-    const rp = bgState.imageSize === 'repeat' ? 'repeat' : 'no-repeat';
+  if(bgState.mode==='image'&&bgState.imageSrc){
+    const op=(bgState.imageOpacity/100).toFixed(2);
+    const sz=bgState.imageSize==='repeat'?'auto':bgState.imageSize;
+    const rp=bgState.imageSize==='repeat'?'repeat':'no-repeat';
     return `background-image:url(${bgState.imageSrc});background-size:${sz};background-repeat:${rp};background-position:center;opacity:${op};`;
   }
   return '';
 }
-
-function refreshBgInCards() {
-  const s = buildBgStyle();
-  document.querySelectorAll('.kartu-bg').forEach(el => { el.style.cssText = s; });
+function refreshBgInCards(){
+  const s=buildBgStyle();
+  document.querySelectorAll('.kartu-bg').forEach(el=>{ el.style.cssText=s; });
 }
 
-/* ── APPLY / RESET EDITS ── */
-function applyEdits() {
-  const g = id => document.getElementById(id).value.trim();
-  config.namaUjian        = g('edit_namaUjian')        || CONFIG_DEFAULTS.namaUjian;
-  config.namaSekolah      = g('edit_namaSekolah')      || CONFIG_DEFAULTS.namaSekolah;
-  config.tahunPelajaran   = g('edit_tahunPelajaran')   || CONFIG_DEFAULTS.tahunPelajaran;
-  config.namaSekolahBadan = g('edit_namaSekolahBadan') || CONFIG_DEFAULTS.namaSekolahBadan;
-  config.watermark        = g('edit_watermark')        || CONFIG_DEFAULTS.watermark;
-  config.tempatTtd        = g('edit_tempatTtd')        || CONFIG_DEFAULTS.tempatTtd;
-  config.tanggalTtd       = g('edit_tanggalTtd')       || CONFIG_DEFAULTS.tanggalTtd;
-  config.jabatanKepsek    = g('edit_jabatanKepsek')    || CONFIG_DEFAULTS.jabatanKepsek;
-  config.namaKepsek       = g('edit_namaKepsek')       || CONFIG_DEFAULTS.namaKepsek;
-  const nip = g('edit_nipKepsek');
-  config.nipKepsek = nip ? 'Nip. ' + nip.replace(/^Nip\.\s*/i,'') : CONFIG_DEFAULTS.nipKepsek;
+/* ── APPLY/RESET ── */
+function applyEdits(){
+  const g=id=>document.getElementById(id).value.trim();
+  config.namaUjian=g('edit_namaUjian')||CONFIG_DEFAULTS.namaUjian;
+  config.namaSekolah=g('edit_namaSekolah')||CONFIG_DEFAULTS.namaSekolah;
+  config.tahunPelajaran=g('edit_tahunPelajaran')||CONFIG_DEFAULTS.tahunPelajaran;
+  config.namaSekolahBadan=g('edit_namaSekolahBadan')||CONFIG_DEFAULTS.namaSekolahBadan;
+  config.watermark=g('edit_watermark')||CONFIG_DEFAULTS.watermark;
+  config.tempatTtd=g('edit_tempatTtd')||CONFIG_DEFAULTS.tempatTtd;
+  config.tanggalTtd=g('edit_tanggalTtd')||CONFIG_DEFAULTS.tanggalTtd;
+  config.jabatanKepsek=g('edit_jabatanKepsek')||CONFIG_DEFAULTS.jabatanKepsek;
+  config.namaKepsek=g('edit_namaKepsek')||CONFIG_DEFAULTS.namaKepsek;
+  const nip=g('edit_nipKepsek');
+  config.nipKepsek=nip?'Nip. '+nip.replace(/^Nip\.\s*/i,''):CONFIG_DEFAULTS.nipKepsek;
   refreshAllCardContent();
-  const badge = document.getElementById('appliedBadge');
-  badge.style.display = 'inline-block';
-  setTimeout(() => badge.style.display = 'none', 2500);
-  setStatus('✓ Kop & tanda tangan diperbarui.','ok');
+  const badge=document.getElementById('appliedBadge');
+  badge.style.display='inline-block';
+  setTimeout(()=>badge.style.display='none',2500);
+  setStatus('✓ Diterapkan','ok');
 }
-
-function resetEdits() {
-  config = { ...CONFIG_DEFAULTS };
-  const s = (id, v) => document.getElementById(id).value = v;
-  s('edit_namaUjian', CONFIG_DEFAULTS.namaUjian);
-  s('edit_namaSekolah', CONFIG_DEFAULTS.namaSekolah);
-  s('edit_tahunPelajaran', CONFIG_DEFAULTS.tahunPelajaran);
-  s('edit_namaSekolahBadan', CONFIG_DEFAULTS.namaSekolahBadan);
-  s('edit_watermark', CONFIG_DEFAULTS.watermark);
-  s('edit_tempatTtd', CONFIG_DEFAULTS.tempatTtd);
-  s('edit_tanggalTtd', CONFIG_DEFAULTS.tanggalTtd);
-  s('edit_jabatanKepsek', CONFIG_DEFAULTS.jabatanKepsek);
-  s('edit_namaKepsek', CONFIG_DEFAULTS.namaKepsek);
-  s('edit_nipKepsek', CONFIG_DEFAULTS.nipKepsek.replace('Nip. ',''));
-  bgState = { mode:'none', color:'#e8f4f8', colorOpacity:30, imageSrc:null, imageOpacity:20, imageSize:'cover' };
+function resetEdits(){
+  config={...CONFIG_DEFAULTS};
+  const s=(id,v)=>document.getElementById(id).value=v;
+  s('edit_namaUjian',CONFIG_DEFAULTS.namaUjian);
+  s('edit_namaSekolah',CONFIG_DEFAULTS.namaSekolah);
+  s('edit_tahunPelajaran',CONFIG_DEFAULTS.tahunPelajaran);
+  s('edit_namaSekolahBadan',CONFIG_DEFAULTS.namaSekolahBadan);
+  s('edit_watermark',CONFIG_DEFAULTS.watermark);
+  s('edit_tempatTtd',CONFIG_DEFAULTS.tempatTtd);
+  s('edit_tanggalTtd',CONFIG_DEFAULTS.tanggalTtd);
+  s('edit_jabatanKepsek',CONFIG_DEFAULTS.jabatanKepsek);
+  s('edit_namaKepsek',CONFIG_DEFAULTS.namaKepsek);
+  s('edit_nipKepsek',CONFIG_DEFAULTS.nipKepsek.replace('Nip. ',''));
+  bgState={mode:'none',color:'#e8f4f8',colorOpacity:30,imageSrc:null,imageOpacity:20,imageSize:'cover'};
   setBgMode('none');
-  document.getElementById('bgColorPicker').value = '#e8f4f8';
-  document.getElementById('bgColorOpacity').value = 30; document.getElementById('bgColorOpacityVal').textContent = '30%';
-  document.getElementById('bgImgOpacity').value  = 20; document.getElementById('bgImgOpacityVal').textContent  = '20%';
-  document.getElementById('bgImgThumb').style.display = 'none';
-  stampOffsetMm = 0;
-  document.getElementById('stampOffsetRange').value = 0;
-  document.getElementById('stampOffsetVal').textContent = '0 mm';
-  stampOffsetXMm = 0;
-  document.getElementById('stampOffsetXRange').value = 0;
-  document.getElementById('stampOffsetXVal').textContent = '0 mm';
-  showWatermark = false;
-  document.getElementById('edit_showWatermark').checked = false;
-  clearStamp();
-  refreshAllCardContent();
-  setStatus('↺ Reset ke default.');
+  stampOffsetMm=0; stampOffsetXMm=0;
+  document.getElementById('stampOffsetRange').value=0; document.getElementById('stampOffsetVal').textContent='0 mm';
+  document.getElementById('stampOffsetXRange').value=0; document.getElementById('stampOffsetXVal').textContent='0 mm';
+  showWatermark=false; document.getElementById('edit_showWatermark').checked=false;
+  clearStamp(); refreshAllCardContent(); setStatus('↺ Reset default');
 }
-
-function refreshAllCardContent() {
-  document.querySelectorAll('.slot-nama-ujian').forEach(el => el.textContent = config.namaUjian);
-  document.querySelectorAll('.slot-nama-sekolah-kop').forEach(el => el.textContent = config.namaSekolah);
-  document.querySelectorAll('.slot-tahun-pelajaran').forEach(el => el.textContent = config.tahunPelajaran);
-  document.querySelectorAll('.slot-nama-sekolah-badan').forEach(el => el.textContent = config.namaSekolahBadan);
-  document.querySelectorAll('.kartu-watermark').forEach(el => {
-    const wmText = escHtml(config.watermark)+'&nbsp;&nbsp;&nbsp;'; let html='';
-    for (let i=0;i<14;i++) html += `<span>${wmText.repeat(3)}</span>`;
-    el.innerHTML = html;
-    el.classList.toggle('hidden', !showWatermark);
+function refreshAllCardContent(){
+  document.querySelectorAll('.slot-nama-ujian').forEach(el=>el.textContent=config.namaUjian);
+  document.querySelectorAll('.slot-nama-sekolah-kop').forEach(el=>el.textContent=config.namaSekolah);
+  document.querySelectorAll('.slot-tahun-pelajaran').forEach(el=>el.textContent=config.tahunPelajaran);
+  document.querySelectorAll('.slot-nama-sekolah-badan').forEach(el=>el.textContent=config.namaSekolahBadan);
+  document.querySelectorAll('.kartu-watermark').forEach(el=>{
+    const wmText=escHtml(config.watermark)+'&nbsp;&nbsp;&nbsp;'; let html='';
+    for(let i=0;i<14;i++) html+=`<span>${wmText.repeat(3)}</span>`;
+    el.innerHTML=html; el.classList.toggle('hidden',!showWatermark);
   });
-  document.querySelectorAll('.slot-titi-mangsa').forEach(el => el.textContent = config.tempatTtd+', '+config.tanggalTtd);
-  document.querySelectorAll('.slot-jabatan-kepsek').forEach(el => el.textContent = config.jabatanKepsek);
-  document.querySelectorAll('.slot-nama-kepsek').forEach(el => el.textContent = config.namaKepsek);
-  document.querySelectorAll('.slot-nip-kepsek').forEach(el => el.textContent = config.nipKepsek);
-  refreshLogosInCards();
-  refreshBgInCards();
-  refreshStampInCards();
+  document.querySelectorAll('.slot-titi-mangsa').forEach(el=>el.textContent=config.tempatTtd+', '+config.tanggalTtd);
+  document.querySelectorAll('.slot-jabatan-kepsek').forEach(el=>el.textContent=config.jabatanKepsek);
+  document.querySelectorAll('.slot-nama-kepsek').forEach(el=>el.textContent=config.namaKepsek);
+  document.querySelectorAll('.slot-nip-kepsek').forEach(el=>el.textContent=config.nipKepsek);
+  refreshLogosInCards(); refreshBgInCards(); refreshStampInCards();
 }
 
 /* ── LOGO ── */
-function handleLogoUpload(type, input) {
-  const file = input.files[0]; if (!file) return;
-  const reader = new FileReader();
-  reader.onload = e => {
-    const src = e.target.result;
-    if (type==='kab') {
-      logoKabSrc=src; const t=document.getElementById('thumbKab'); t.src=src; t.style.display='inline-block';
-      document.getElementById('clearKabBtn').style.display='inline'; setStatus('✓ Logo Kabupaten diupload.','ok');
+function handleLogoUpload(type,input){
+  const file=input.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const src=e.target.result;
+    if(type==='kab'){
+      logoKabSrc=src;
+      document.getElementById('thumbKab').src=src; document.getElementById('thumbKab').style.display='inline-block';
+      document.getElementById('clearKabBtn').style.display='inline';
+      setStatus('✓ Logo Kab','ok');
     } else {
-      logoSmpSrc=src; const t=document.getElementById('thumbSmp'); t.src=src; t.style.display='inline-block';
-      document.getElementById('clearSmpBtn').style.display='inline'; setStatus('✓ Logo Sekolah diupload.','ok');
+      logoSmpSrc=src;
+      document.getElementById('thumbSmp').src=src; document.getElementById('thumbSmp').style.display='inline-block';
+      document.getElementById('clearSmpBtn').style.display='inline';
+      setStatus('✓ Logo Sekolah','ok');
     }
     refreshLogosInCards();
   };
   reader.readAsDataURL(file);
 }
-
-function clearLogo(type) {
-  if (type==='kab') {
-    logoKabSrc=null; document.getElementById('logoKabInput').value='';
-    const t=document.getElementById('thumbKab'); t.src=''; t.style.display='none';
-    document.getElementById('clearKabBtn').style.display='none';
-  } else {
-    logoSmpSrc=null; document.getElementById('logoSmpInput').value='';
-    const t=document.getElementById('thumbSmp'); t.src=''; t.style.display='none';
-    document.getElementById('clearSmpBtn').style.display='none';
-  }
+function clearLogo(type){
+  if(type==='kab'){ logoKabSrc=null; document.getElementById('logoKabInput').value=''; document.getElementById('thumbKab').style.display='none'; document.getElementById('clearKabBtn').style.display='none'; }
+  else { logoSmpSrc=null; document.getElementById('logoSmpInput').value=''; document.getElementById('thumbSmp').style.display='none'; document.getElementById('clearSmpBtn').style.display='none'; }
   refreshLogosInCards();
 }
-
-function refreshLogosInCards() {
-  document.querySelectorAll('.logo-kab-slot').forEach(el => {
-    el.innerHTML = logoKabSrc ? `<img src="${logoKabSrc}" style="width:28px;height:28px;object-fit:contain;">` : `<div class="logo-placeholder">LOGO<br>KAB</div>`;
-  });
-  document.querySelectorAll('.logo-smp-slot').forEach(el => {
-    el.innerHTML = logoSmpSrc ? `<img src="${logoSmpSrc}" style="width:28px;height:28px;object-fit:contain;">` : `<div class="logo-placeholder">LOGO<br>SMP</div>`;
-  });
+function refreshLogosInCards(){
+  document.querySelectorAll('.logo-kab-slot').forEach(el=>{ el.innerHTML=logoKabSrc?`<img src="${logoKabSrc}" style="width:28px;height:28px;object-fit:contain;">`:`<div class="logo-placeholder">LOGO<br>KAB</div>`; });
+  document.querySelectorAll('.logo-smp-slot').forEach(el=>{ el.innerHTML=logoSmpSrc?`<img src="${logoSmpSrc}" style="width:28px;height:28px;object-fit:contain;">`:`<div class="logo-placeholder">LOGO<br>SMP</div>`; });
 }
 
 /* ── FILE LOAD ── */
-document.getElementById('fileInput').addEventListener('change', function(e) {
-  const file = e.target.files[0]; if (!file) return;
-  document.getElementById('fileLabel').textContent = file.name;
-  setStatus('⏳ Membaca file...','warn');
-  const reader = new FileReader();
-  reader.onload = evt => {
-    try {
-      workbook = XLSX.read(evt.target.result, {type:'binary'});
+document.getElementById('fileInput').addEventListener('change',function(e){
+  const file=e.target.files[0]; if(!file) return;
+  const label=file.name.length>22?file.name.substring(0,20)+'…':file.name;
+  document.getElementById('fileLabel').textContent=file.name;
+  document.getElementById('fileLabelMobile').textContent=label;
+  setStatus('⏳ Membaca…','warn');
+  const reader=new FileReader();
+  reader.onload=evt=>{
+    try{
+      workbook=XLSX.read(evt.target.result,{type:'binary'});
       populateSheetSelect();
-      setStatus(`✓ File dibaca: ${file.name} (${workbook.SheetNames.length} sheet)`,'ok');
-    } catch(err) { setStatus('✗ Gagal membaca file: '+err.message,'err'); }
+      setStatus(`✓ ${workbook.SheetNames.length} sheet`,'ok');
+      document.getElementById('bnav-sheet').disabled=false;
+    } catch(err){ setStatus('✗ Gagal','err'); }
   };
   reader.readAsBinaryString(file);
 });
 
-function populateSheetSelect() {
-  const sel = document.getElementById('sheetSelect');
-  sel.innerHTML = '<option value="">— pilih sheet —</option>';
-  workbook.SheetNames.forEach(name => {
-    const opt = document.createElement('option');
-    opt.value = name; opt.textContent = name;
-    if (name.toLowerCase().includes('kelas_7') || name.toLowerCase().includes('kelas 7')) opt.selected = true;
-    sel.appendChild(opt);
-  });
+function populateSheetSelect(){
+  const opts='<option value="">— pilih sheet —</option>'+workbook.SheetNames.map(n=>`<option value="${n}">${n}</option>`).join('');
+  document.getElementById('sheetSelect').innerHTML=opts;
+  document.getElementById('sheetSelectMobile').innerHTML=opts;
 }
 
-function loadSheet() {
-  if (!workbook) return alert('Upload file terlebih dahulu!');
-  const name = document.getElementById('sheetSelect').value;
-  if (!name) return alert('Pilih sheet terlebih dahulu!');
-  const data = getSheetData(name);
-  if (!data.length) return setStatus('⚠ Sheet kosong atau header tidak ditemukan.','warn');
-  renderAllCards(data, name);
+function loadSheet(){
+  if(!workbook) return alert('Upload file terlebih dahulu!');
+  const name=document.getElementById('sheetSelect').value;
+  if(!name) return alert('Pilih sheet terlebih dahulu!');
+  const data=getSheetData(name);
+  if(!data.length) return setStatus('⚠ Sheet kosong','warn');
+  renderAllCards(data,name);
+}
+function loadAllSheets(){
+  if(!workbook) return alert('Upload file terlebih dahulu!');
+  let all=[];
+  workbook.SheetNames.forEach(n=>{ const nl=n.toLowerCase(); if(nl.includes('kelas_7')||nl.includes('kelas 7')||nl.includes('kelas_8')||nl.includes('kelas 8')) all=all.concat(getSheetData(n)); });
+  if(!all.length) workbook.SheetNames.forEach(n=>all=all.concat(getSheetData(n)));
+  if(!all.length) return setStatus('⚠ Tidak ada data','warn');
+  renderAllCards(all,'Semua Kelas');
 }
 
-function loadAllSheets() {
-  if (!workbook) return alert('Upload file terlebih dahulu!');
-  let all = [];
-  workbook.SheetNames.forEach(n => {
-    const nl = n.toLowerCase();
-    if (nl.includes('kelas_7')||nl.includes('kelas 7')||nl.includes('kelas_8')||nl.includes('kelas 8'))
-      all = all.concat(getSheetData(n));
-  });
-  if (!all.length) workbook.SheetNames.forEach(n => all = all.concat(getSheetData(n)));
-  if (!all.length) return setStatus('⚠ Tidak ada data ditemukan.','warn');
-  renderAllCards(all, 'Semua Kelas');
-}
-
-function getSheetData(sheetName) {
-  const ws = workbook.Sheets[sheetName];
-  const raw = XLSX.utils.sheet_to_json(ws, {header:1, defval:''});
-  if (!raw.length) return [];
-  let hi = 0;
-  for (let i=0;i<Math.min(5,raw.length);i++) {
-    const r = raw[i].join(' ').toLowerCase();
-    if (r.includes('nama')||r.includes('no_peserta')||r.includes('nis')) { hi=i; break; }
-  }
-  const headers = raw[hi].map(h => String(h).trim().toLowerCase().replace(/\s+/g,'_').replace(/\//g,'_'));
-  const rows = [];
-  for (let i=hi+1;i<raw.length;i++) {
-    const row = raw[i];
-    if (row.every(c=>c===''||c===null||c===undefined)) continue;
-    const obj = {}; headers.forEach((h,idx)=>{ obj[h]=row[idx]!==undefined?String(row[idx]).trim():''; });
+function getSheetData(sheetName){
+  const ws=workbook.Sheets[sheetName];
+  const raw=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
+  if(!raw.length) return [];
+  let hi=0;
+  for(let i=0;i<Math.min(5,raw.length);i++){ const r=raw[i].join(' ').toLowerCase(); if(r.includes('nama')||r.includes('no_peserta')||r.includes('nis')){ hi=i; break; } }
+  const headers=raw[hi].map(h=>String(h).trim().toLowerCase().replace(/\s+/g,'_').replace(/\//g,'_'));
+  const rows=[];
+  for(let i=hi+1;i<raw.length;i++){
+    const row=raw[i];
+    if(row.every(c=>c===''||c===null||c===undefined)) continue;
+    const obj={}; headers.forEach((h,idx)=>{ obj[h]=row[idx]!==undefined?String(row[idx]).trim():''; });
     rows.push(obj);
   }
   return rows;
 }
 
-function getField(row,...keys) {
-  for (const k of keys) {
-    if (row[k]!==undefined&&row[k]!=='') return row[k];
-    const f = Object.keys(row).find(rk=>rk.includes(k));
-    if (f&&row[f]!=='') return row[f];
-  }
+function getField(row,...keys){
+  for(const k of keys){ if(row[k]!==undefined&&row[k]!=='') return row[k]; const f=Object.keys(row).find(rk=>rk.includes(k)); if(f&&row[f]!=='') return row[f]; }
   return '';
 }
 
-function renderAllCards(data, label) {
-  document.getElementById('placeholder').style.display = 'none';
-  const preview = document.getElementById('preview-area');
-  preview.querySelectorAll('.page-a4').forEach(p=>p.remove());
-  const PERPAGE = 8, total = Math.ceil(data.length/PERPAGE);
-  for (let p=0;p<total;p++) {
-    const page = document.createElement('div'); page.className='page-a4';
-    const slice = data.slice(p*PERPAGE,(p+1)*PERPAGE);
-    for (let i=0;i<PERPAGE;i++) page.appendChild(buildCard(slice[i]||null));
-    preview.appendChild(page);
+function renderAllCards(data,label){
+  document.getElementById('placeholder').style.display='none';
+  const preview=document.getElementById('preview-area');
+  preview.querySelectorAll('.a4-scaler').forEach(p=>p.remove());
+  const PERPAGE=8,total=Math.ceil(data.length/PERPAGE);
+  for(let p=0;p<total;p++){
+    const scaler=document.createElement('div'); scaler.className='a4-scaler';
+    const page=document.createElement('div'); page.className='page-a4';
+    const slice=data.slice(p*PERPAGE,(p+1)*PERPAGE);
+    for(let i=0;i<PERPAGE;i++) page.appendChild(buildCard(slice[i]||null));
+    scaler.appendChild(page); preview.appendChild(scaler);
   }
-  setStatus(`✓ ${label} — ${data.length} peserta · ${total} halaman A4`,'ok');
+  setStatus(`✓ ${data.length} peserta`,'ok');
+  document.getElementById('bnav-pdf').disabled=false;
+  setTimeout(scaleA4Pages,100);
 }
 
-function buildStampHtml() {
-  const hidden = !stampSrc ? ' hidden' : '';
-  const bottomVal = (-stampOffsetMm) + 'mm';
-  const imgStyle = `width:${stampSizeMm}mm;height:${stampSizeMm}mm;opacity:${(stampOpacity/100).toFixed(2)};object-fit:contain;display:block;`;
-  const wrapStyle = `bottom:${bottomVal};left:50%;transform:translateX(calc(-50% + ${stampOffsetXMm}mm));`;
-  const src = stampSrc || '';
-  return `<div class="ttd-stamp-wrap${hidden}" style="${wrapStyle}"><img src="${src}" style="${imgStyle}"></div>`;
+function buildStampHtml(){
+  const hidden=!stampSrc?' hidden':'';
+  const imgStyle=`width:${stampSizeMm}mm;height:${stampSizeMm}mm;opacity:${(stampOpacity/100).toFixed(2)};object-fit:contain;display:block;`;
+  const wrapStyle=`bottom:${(-stampOffsetMm)}mm;left:50%;transform:translateX(calc(-50% + ${stampOffsetXMm}mm));`;
+  return `<div class="ttd-stamp-wrap${hidden}" style="${wrapStyle}"><img src="${stampSrc||''}" style="${imgStyle}"></div>`;
 }
 
-function buildCard(peserta) {
-  const div = document.createElement('div'); div.className='kartu';
-  if (!peserta) { div.style.cssText='background:#f9f9f9;border:1.5px dashed #ccc;'; return div; }
-  const ruang=getField(peserta,'ruang'), nama=getField(peserta,'nama'), kelas=getField(peserta,'kelas');
-  const nis=getField(peserta,'nis_nisn','nis','nisn','nis__nisn'), nop=getField(peserta,'no_peserta','nomor_peserta');
+function buildCard(peserta){
+  const div=document.createElement('div'); div.className='kartu';
+  if(!peserta){ div.style.cssText='background:#f9f9f9;border:1.5px dashed #ccc;'; return div; }
+  const ruang=getField(peserta,'ruang'),nama=getField(peserta,'nama'),kelas=getField(peserta,'kelas');
+  const nis=getField(peserta,'nis_nisn','nis','nisn','nis__nisn'),nop=getField(peserta,'no_peserta','nomor_peserta');
   const wmText=escHtml(config.watermark)+'&nbsp;&nbsp;&nbsp;'; let wmLines='';
   for(let i=0;i<14;i++) wmLines+=`<span>${wmText.repeat(3)}</span>`;
-  const bgStyle = buildBgStyle();
   div.innerHTML=`
-    <div class="kartu-bg" style="${bgStyle}"></div>
+    <div class="kartu-bg" style="${buildBgStyle()}"></div>
     <div class="kartu-watermark${showWatermark?'':' hidden'}">${wmLines}</div>
     <div class="kartu-header">
       <div class="logo-kab-slot" style="flex-shrink:0;">${logoKabSrc?`<img src="${logoKabSrc}" style="width:28px;height:28px;object-fit:contain;">`:`<div class="logo-placeholder">LOGO<br>KAB</div>`}</div>
@@ -1106,10 +922,7 @@ function buildCard(peserta) {
       <div class="logo-smp-slot" style="flex-shrink:0;">${logoSmpSrc?`<img src="${logoSmpSrc}" style="width:28px;height:28px;object-fit:contain;">`:`<div class="logo-placeholder">LOGO<br>SMP</div>`}</div>
     </div>
     <div class="kartu-judul"><span>KARTU PESERTA</span></div>
-    <div class="kartu-ruang-row">
-      <span class="ruang-label">RUANG :</span>
-      <div class="ruang-box">${escHtml(ruang)}</div>
-    </div>
+    <div class="kartu-ruang-row"><span class="ruang-label">RUANG :</span><div class="ruang-box">${escHtml(ruang)}</div></div>
     <div class="kartu-data">
       <div class="data-row"><span class="data-label">Nama</span><span class="data-colon">:</span><span class="data-value">${escHtml(nama)}</span></div>
       <div class="data-row"><span class="data-label">Kelas</span><span class="data-colon">:</span><span class="data-value">${escHtml(kelas)}</span></div>
@@ -1130,190 +943,96 @@ function buildCard(peserta) {
   return div;
 }
 
-function escHtml(s) {
-  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
+function escHtml(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
-function clearAll() {
+function clearAll(){
   workbook=null;
   document.getElementById('fileInput').value='';
   document.getElementById('fileLabel').textContent='Upload Spreadsheet';
+  document.getElementById('fileLabelMobile').textContent='Upload Spreadsheet (.xlsx / .csv)';
   document.getElementById('sheetSelect').innerHTML='<option value="">— pilih sheet —</option>';
-  document.getElementById('preview-area').querySelectorAll('.page-a4').forEach(p=>p.remove());
+  document.getElementById('sheetSelectMobile').innerHTML='<option value="">— pilih sheet —</option>';
+  document.getElementById('preview-area').querySelectorAll('.a4-scaler').forEach(p=>p.remove());
   document.getElementById('placeholder').style.display='';
-  setStatus('Data di-clear. Silakan upload file baru.');
+  document.getElementById('bnav-sheet').disabled=true;
+  document.getElementById('bnav-pdf').disabled=true;
+  setStatus('Clear');
 }
 
-/* ── DOWNLOAD PDF ── */
-async function downloadPDF() {
-  const pages = document.querySelectorAll('.page-a4');
-  if (!pages.length) return alert('Tidak ada kartu untuk di-download. Load data terlebih dahulu!');
-
-  const btn = document.getElementById('btnDownloadPdf');
-  btn.disabled = true;
-
-  const overlay = document.getElementById('pdf-overlay');
-  const progressBar = document.getElementById('pdf-progress-bar');
-  const progressText = document.getElementById('pdf-progress-text');
-  const overlaySub = document.getElementById('pdf-overlay-sub');
+/* ── PDF ── */
+async function downloadPDF(){
+  const pages=document.querySelectorAll('.page-a4');
+  if(!pages.length) return alert('Load data terlebih dahulu!');
+  const btn=document.getElementById('btnDownloadPdf');
+  if(btn) btn.disabled=true;
+  document.getElementById('bnav-pdf').disabled=true;
+  const overlay=document.getElementById('pdf-overlay');
+  const progressBar=document.getElementById('pdf-progress-bar');
+  const progressText=document.getElementById('pdf-progress-text');
   overlay.classList.add('show');
-  progressBar.style.width = '0%';
-  progressText.textContent = '0%';
+  progressBar.style.width='0%'; progressText.textContent='0%';
+  const setProgress=(pct,sub)=>{ progressBar.style.width=pct+'%'; progressText.textContent=Math.round(pct)+'%'; if(sub) document.getElementById('pdf-overlay-sub').textContent=sub; };
 
-  const setProgress = (pct, sub) => {
-    progressBar.style.width = pct + '%';
-    progressText.textContent = Math.round(pct) + '%';
-    if (sub) overlaySub.textContent = sub;
-  };
+  // Save & remove transforms for capture
+  const savedTransforms=[];
+  const savedMargins=[];
+  pages.forEach(page=>{ savedTransforms.push(page.style.transform); savedMargins.push(page.style.marginBottom); page.style.transform='none'; page.style.marginBottom=''; });
 
-  try {
-    const { jsPDF } = window.jspdf;
-    const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-
-    const pageW = 210, pageH = 297;
-    const scale = 2;
-
-    for (let i = 0; i < pages.length; i++) {
-      const page = pages[i];
-      const pct = (i / pages.length) * 90;
-      setProgress(pct, `Memproses halaman ${i+1} dari ${pages.length}...`);
-
-      const origMargin = page.style.margin;
-      const origBorderRadius = page.style.borderRadius;
-      const origBoxShadow = page.style.boxShadow;
-      page.style.margin = '0';
-      page.style.borderRadius = '0';
-      page.style.boxShadow = 'none';
-
-      const canvas = await html2canvas(page, {
-        scale: scale,
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: '#ffffff',
-        logging: false,
-        width: page.offsetWidth,
-        height: page.offsetHeight,
-      });
-
-      page.style.margin = origMargin;
-      page.style.borderRadius = origBorderRadius;
-      page.style.boxShadow = origBoxShadow;
-
-      const imgData = canvas.toDataURL('image/jpeg', 0.95);
-      const imgW = pageW;
-      const imgH = (canvas.height / canvas.width) * imgW;
-
-      if (i > 0) pdf.addPage();
-      pdf.addImage(imgData, 'JPEG', 0, 0, imgW, Math.min(imgH, pageH));
-
-      await new Promise(r => setTimeout(r, 30));
+  try{
+    const{jsPDF}=window.jspdf;
+    const pdf=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+    const pageW=210,pageH=297,scale=2;
+    for(let i=0;i<pages.length;i++){
+      const page=pages[i];
+      setProgress((i/pages.length)*90,`Halaman ${i+1} dari ${pages.length}...`);
+      const orig={margin:page.style.margin,borderRadius:page.style.borderRadius,boxShadow:page.style.boxShadow};
+      page.style.margin='0'; page.style.borderRadius='0'; page.style.boxShadow='none';
+      const canvas=await html2canvas(page,{scale,useCORS:true,allowTaint:true,backgroundColor:'#ffffff',logging:false});
+      page.style.margin=orig.margin; page.style.borderRadius=orig.borderRadius; page.style.boxShadow=orig.boxShadow;
+      const imgData=canvas.toDataURL('image/jpeg',0.95);
+      const imgH=(canvas.height/canvas.width)*pageW;
+      if(i>0) pdf.addPage();
+      pdf.addImage(imgData,'JPEG',0,0,pageW,Math.min(imgH,pageH));
+      await new Promise(r=>setTimeout(r,30));
     }
-
-    setProgress(95, 'Menyimpan file PDF...');
-    await new Promise(r => setTimeout(r, 100));
-
-    const safeName = config.namaSekolah.replace(/[^a-zA-Z0-9\s]/g,'').replace(/\s+/g,'_').substring(0,30);
-    const fileName = `Kartu_Peserta_${safeName}.pdf`;
-    const pdfBase64 = pdf.output('datauristring').split(',')[1];
-    universalDownload(pdfBase64, 'application/pdf', fileName);
-
-    setProgress(100, 'Selesai!');
-    await new Promise(r => setTimeout(r, 600));
-    setStatus(`✓ PDF berhasil diunduh (${pages.length} halaman).`, 'ok');
-  } catch(err) {
-    console.error(err);
-    setStatus('✗ Gagal membuat PDF: ' + err.message, 'err');
-    alert('Gagal membuat PDF: ' + err.message);
-  } finally {
+    setProgress(95,'Menyimpan PDF...');
+    await new Promise(r=>setTimeout(r,100));
+    const safeName=config.namaSekolah.replace(/[^a-zA-Z0-9\s]/g,'').replace(/\s+/g,'_').substring(0,30);
+    const fileName=`Kartu_Peserta_${safeName}.pdf`;
+    const pdfBase64=pdf.output('datauristring').split(',')[1];
+    universalDownload(pdfBase64,'application/pdf',fileName);
+    setProgress(100,'Selesai!');
+    await new Promise(r=>setTimeout(r,600));
+    setStatus(`✓ PDF ${pages.length} hal.`,'ok');
+  } catch(err){ setStatus('✗ Gagal PDF','err'); alert('Gagal: '+err.message); }
+  finally{
+    pages.forEach((page,i)=>{ page.style.transform=savedTransforms[i]; page.style.marginBottom=savedMargins[i]; });
+    scaleA4Pages();
     overlay.classList.remove('show');
-    btn.disabled = false;
+    if(btn) btn.disabled=false;
+    document.getElementById('bnav-pdf').disabled=false;
   }
 }
 
-/* ── DOWNLOAD UNIVERSAL (WebView Android-safe) ── */
-function universalDownload(base64Data, mimeType, fileName) {
-  const pureB64 = base64Data.includes(',') ? base64Data.split(',')[1] : base64Data;
-
-  if (window.AndroidInterface && typeof window.AndroidInterface.downloadBase64File === 'function') {
-    try {
-      window.AndroidInterface.downloadBase64File(pureB64, fileName, mimeType);
-      return true;
-    } catch(e) { /* lanjut ke fallback */ }
-  }
-
-  const dataURI = 'data:' + mimeType + ';base64,' + pureB64;
-  try {
-    const a = document.createElement('a');
-    a.href = dataURI;
-    a.download = fileName;
-    a.style.display = 'none';
-    document.body.appendChild(a);
-    a.click();
-    setTimeout(() => document.body.removeChild(a), 500);
-    return true;
-  } catch(e) { /* lanjut ke fallback */ }
-
-  window.location.href = dataURI;
-  return true;
+function universalDownload(base64Data,mimeType,fileName){
+  const pureB64=base64Data.includes(',')?base64Data.split(',')[1]:base64Data;
+  if(window.AndroidInterface&&typeof window.AndroidInterface.downloadBase64File==='function'){ try{ window.AndroidInterface.downloadBase64File(pureB64,fileName,mimeType); return; } catch(e){} }
+  const dataURI='data:'+mimeType+';base64,'+pureB64;
+  try{ const a=document.createElement('a'); a.href=dataURI; a.download=fileName; a.style.display='none'; document.body.appendChild(a); a.click(); setTimeout(()=>document.body.removeChild(a),500); return; } catch(e){}
+  window.location.href=dataURI;
 }
 
-/* ── DOWNLOAD TEMPLATE — generate langsung dengan SheetJS (sama seperti denah ruangan) ── */
-function downloadTemplate() {
-  const wb = XLSX.utils.book_new();
-
-  // Sheet Kelas 7
-  const dataKelas7 = [
-    ['ruang', 'nama', 'kelas', 'nis_nisn', 'no_peserta'],
-    [1, 'Ahmad Fauzi',        '7A', '0011234567 / 1234567890', '701'],
-    [1, 'Siti Rahayu',        '7A', '0011234568 / 1234567891', '702'],
-    [1, 'Rizky Pratama',      '7A', '0011234569 / 1234567892', '703'],
-    [1, 'Nurul Hidayah',      '7A', '0011234570 / 1234567893', '704'],
-    [1, 'Hendra Gunawan',     '7A', '0011234571 / 1234567894', '705'],
-    [1, 'Joko Prasetyo',      '7A', '0011234572 / 1234567895', '706'],
-    [1, 'Lina Marlina',       '7A', '0011234573 / 1234567896', '707'],
-    [1, 'Nanda Putra',        '7A', '0011234574 / 1234567897', '708'],
-    [2, 'Pandu Wicaksono',    '7B', '0011234575 / 1234567898', '709'],
-    [2, 'Reza Fardhan',       '7B', '0011234576 / 1234567899', '710'],
-    [2, 'Tika Wulandari',     '7B', '0011234577 / 1234567900', '711'],
-    [2, 'Vina Fitriani',      '7B', '0011234578 / 1234567901', '712'],
-    [2, 'Wahyu Nugroho',      '7B', '0011234579 / 1234567902', '713'],
-    [2, 'Xena Mareta',        '7B', '0011234580 / 1234567903', '714'],
-    [2, 'Yusuf Ibrahim',      '7B', '0011234581 / 1234567904', '715'],
-    [2, 'Zahra Amini',        '7B', '0011234582 / 1234567905', '716'],
-  ];
-
-  // Sheet Kelas 8
-  const dataKelas8 = [
-    ['ruang', 'nama', 'kelas', 'nis_nisn', 'no_peserta'],
-    [3, 'Budi Santoso',       '8A', '0021234567 / 2234567890', '801'],
-    [3, 'Dewi Lestari',       '8A', '0021234568 / 2234567891', '802'],
-    [3, 'Eka Putri',          '8A', '0021234569 / 2234567892', '803'],
-    [3, 'Fajar Setiawan',     '8A', '0021234570 / 2234567893', '804'],
-    [3, 'Indah Permata',      '8A', '0021234571 / 2234567894', '805'],
-    [3, 'Kartika Sari',       '8A', '0021234572 / 2234567895', '806'],
-    [3, 'Mahmud Syarif',      '8A', '0021234573 / 2234567896', '807'],
-    [3, 'Oktavia Dewi',       '8A', '0021234574 / 2234567897', '808'],
-    [4, 'Qory Amelia',        '8B', '0021234575 / 2234567898', '809'],
-    [4, 'Sandi Kurniawan',    '8B', '0021234576 / 2234567899', '810'],
-    [4, 'Umar Hakim',         '8B', '0021234577 / 2234567900', '811'],
-    [4, 'Aditya Bagas',       '8B', '0021234578 / 2234567901', '812'],
-    [4, 'Bella Natasya',      '8B', '0021234579 / 2234567902', '813'],
-    [4, 'Candra Wijaya',      '8B', '0021234580 / 2234567903', '814'],
-    [4, 'Diana Fitri',        '8B', '0021234581 / 2234567904', '815'],
-    [4, 'Evan Maulana',       '8B', '0021234582 / 2234567905', '816'],
-  ];
-
-  const wsKelas7 = XLSX.utils.aoa_to_sheet(dataKelas7);
-  wsKelas7['!cols'] = [{ wch:8 }, { wch:22 }, { wch:8 }, { wch:24 }, { wch:12 }];
-
-  const wsKelas8 = XLSX.utils.aoa_to_sheet(dataKelas8);
-  wsKelas8['!cols'] = [{ wch:8 }, { wch:22 }, { wch:8 }, { wch:24 }, { wch:12 }];
-
-  XLSX.utils.book_append_sheet(wb, wsKelas7, 'Kelas_7');
-  XLSX.utils.book_append_sheet(wb, wsKelas8, 'Kelas_8');
-
-  XLSX.writeFile(wb, 'template_kartu_peserta.xlsx');
-  setStatus('✓ Templat Excel berhasil didownload.', 'ok');
+/* ── TEMPLATE ── */
+function downloadTemplate(){
+  const wb=XLSX.utils.book_new();
+  const dataKelas7=[['ruang','nama','kelas','nis_nisn','no_peserta'],[1,'Ahmad Fauzi','7A','0011234567 / 1234567890','701'],[1,'Siti Rahayu','7A','0011234568 / 1234567891','702'],[1,'Rizky Pratama','7A','0011234569 / 1234567892','703'],[1,'Nurul Hidayah','7A','0011234570 / 1234567893','704'],[1,'Hendra Gunawan','7A','0011234571 / 1234567894','705'],[1,'Joko Prasetyo','7A','0011234572 / 1234567895','706'],[1,'Lina Marlina','7A','0011234573 / 1234567896','707'],[1,'Nanda Putra','7A','0011234574 / 1234567897','708'],[2,'Pandu Wicaksono','7B','0011234575 / 1234567898','709'],[2,'Reza Fardhan','7B','0011234576 / 1234567899','710'],[2,'Tika Wulandari','7B','0011234577 / 1234567900','711'],[2,'Vina Fitriani','7B','0011234578 / 1234567901','712'],[2,'Wahyu Nugroho','7B','0011234579 / 1234567902','713'],[2,'Xena Mareta','7B','0011234580 / 1234567903','714'],[2,'Yusuf Ibrahim','7B','0011234581 / 1234567904','715'],[2,'Zahra Amini','7B','0011234582 / 1234567905','716']];
+  const dataKelas8=[['ruang','nama','kelas','nis_nisn','no_peserta'],[3,'Budi Santoso','8A','0021234567 / 2234567890','801'],[3,'Dewi Lestari','8A','0021234568 / 2234567891','802'],[3,'Eka Putri','8A','0021234569 / 2234567892','803'],[3,'Fajar Setiawan','8A','0021234570 / 2234567893','804'],[3,'Indah Permata','8A','0021234571 / 2234567894','805'],[3,'Kartika Sari','8A','0021234572 / 2234567895','806'],[3,'Mahmud Syarif','8A','0021234573 / 2234567896','807'],[3,'Oktavia Dewi','8A','0021234574 / 2234567897','808'],[4,'Qory Amelia','8B','0021234575 / 2234567898','809'],[4,'Sandi Kurniawan','8B','0021234576 / 2234567899','810'],[4,'Umar Hakim','8B','0021234577 / 2234567900','811'],[4,'Aditya Bagas','8B','0021234578 / 2234567901','812'],[4,'Bella Natasya','8B','0021234579 / 2234567902','813'],[4,'Candra Wijaya','8B','0021234580 / 2234567903','814'],[4,'Diana Fitri','8B','0021234581 / 2234567904','815'],[4,'Evan Maulana','8B','0021234582 / 2234567905','816']];
+  const ws7=XLSX.utils.aoa_to_sheet(dataKelas7); ws7['!cols']=[{wch:8},{wch:22},{wch:8},{wch:24},{wch:12}];
+  const ws8=XLSX.utils.aoa_to_sheet(dataKelas8); ws8['!cols']=[{wch:8},{wch:22},{wch:8},{wch:24},{wch:12}];
+  XLSX.utils.book_append_sheet(wb,ws7,'Kelas_7');
+  XLSX.utils.book_append_sheet(wb,ws8,'Kelas_8');
+  XLSX.writeFile(wb,'template_kartu_peserta.xlsx');
+  setStatus('✓ Templat didownload','ok');
 }
 </script>
 </body>
