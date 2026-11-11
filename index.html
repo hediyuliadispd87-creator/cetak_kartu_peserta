@@ -1214,21 +1214,43 @@ function universalDownload(base64Data,mimeType,fileName){
 }
 
 /* TEMPLATE */
+function buildTemplateBase64(){
+  const wb=XLSX.utils.book_new();
+  const dataKelas7=[['ruang','nama','kelas','nis_nisn','no_peserta'],[1,'Ahmad Fauzi','7A','0011234567 / 1234567890','701'],[1,'Siti Rahayu','7A','0011234568 / 1234567891','702'],[1,'Rizky Pratama','7A','0011234569 / 1234567892','703'],[1,'Nurul Hidayah','7A','0011234570 / 1234567893','704'],[1,'Hendra Gunawan','7A','0011234571 / 1234567894','705'],[1,'Joko Prasetyo','7A','0011234572 / 1234567895','706'],[1,'Lina Marlina','7A','0011234573 / 1234567896','707'],[1,'Nanda Putra','7A','0011234574 / 1234567897','708'],[2,'Pandu Wicaksono','7B','0011234575 / 1234567898','709'],[2,'Reza Fardhan','7B','0011234576 / 1234567899','710'],[2,'Tika Wulandari','7B','0011234577 / 1234567900','711'],[2,'Vina Fitriani','7B','0011234578 / 1234567901','712'],[2,'Wahyu Nugroho','7B','0011234579 / 1234567902','713'],[2,'Xena Mareta','7B','0011234580 / 1234567903','714'],[2,'Yusuf Ibrahim','7B','0011234581 / 1234567904','715'],[2,'Zahra Amini','7B','0011234582 / 1234567905','716']];
+  const dataKelas8=[['ruang','nama','kelas','nis_nisn','no_peserta'],[3,'Budi Santoso','8A','0021234567 / 2234567890','801'],[3,'Dewi Lestari','8A','0021234568 / 2234567891','802'],[3,'Eka Putri','8A','0021234569 / 2234567892','803'],[3,'Fajar Setiawan','8A','0021234570 / 2234567893','804'],[3,'Indah Permata','8A','0021234571 / 2234567894','805'],[3,'Kartika Sari','8A','0021234572 / 2234567895','806'],[3,'Mahmud Syarif','8A','0021234573 / 2234567896','807'],[3,'Oktavia Dewi','8A','0021234574 / 2234567897','808'],[4,'Qory Amelia','8B','0021234575 / 2234567898','809'],[4,'Sandi Kurniawan','8B','0021234576 / 2234567899','810'],[4,'Umar Hakim','8B','0021234577 / 2234567900','811'],[4,'Aditya Bagas','8B','0021234578 / 2234567901','812'],[4,'Bella Natasya','8B','0021234579 / 2234567902','813'],[4,'Candra Wijaya','8B','0021234580 / 2234567903','814'],[4,'Diana Fitri','8B','0021234581 / 2234567904','815'],[4,'Evan Maulana','8B','0021234582 / 2234567905','816']];
+  const ws7=XLSX.utils.aoa_to_sheet(dataKelas7); ws7['!cols']=[{wch:8},{wch:22},{wch:8},{wch:24},{wch:12}];
+  const ws8=XLSX.utils.aoa_to_sheet(dataKelas8); ws8['!cols']=[{wch:8},{wch:22},{wch:8},{wch:24},{wch:12}];
+  XLSX.utils.book_append_sheet(wb,ws7,'Kelas_7');
+  XLSX.utils.book_append_sheet(wb,ws8,'Kelas_8');
+  return XLSX.write(wb,{bookType:'xlsx',type:'base64'});
+}
+
 const TEMPLATE_FILE_ID='1KsRoM6_Z2ncxcoH0NFLMgt-b4a5hiR5T';
 const TEMPLATE_URL='https://drive.google.com/uc?export=download&id='+TEMPLATE_FILE_ID;
-function downloadTemplate(){
+const XLSX_MIME='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+const TEMPLATE_NAME='template_kartu_peserta.xlsx';
+function blobToBase64(blob){
+  return new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(r.result); r.onerror=()=>rej(r.error); r.readAsDataURL(blob); });
+}
+async function downloadTemplate(){
+  setStatus('Mengunduh templat...','ok');
   try{
-    const a=document.createElement('a');
-    a.href=TEMPLATE_URL;
-    a.download='template_kartu_peserta.xlsx';
-    a.rel='noopener';
-    a.style.display='none';
-    document.body.appendChild(a);
-    a.click();
-    setTimeout(()=>document.body.removeChild(a),500);
-    setStatus('✓ Templat sedang didownload','ok');
+    // 1) Ambil file dari Google Drive lalu simpan lewat jalur yang sama dgn PDF (nama & ekstensi dijamin .xlsx)
+    const resp=await fetch(TEMPLATE_URL);
+    if(!resp.ok) throw new Error('HTTP '+resp.status);
+    const blob=await resp.blob();
+    if(blob.type && blob.type.indexOf('text/html')===0) throw new Error('Bukan file xlsx');
+    const dataUrl=await blobToBase64(blob);
+    universalDownload(dataUrl,XLSX_MIME,TEMPLATE_NAME);
+    setStatus('✓ Templat didownload','ok');
   }catch(e){
-    window.location.href=TEMPLATE_URL;
+    // 2) Cadangan: buat templat di dalam aplikasi (tetap .xlsx)
+    try{
+      universalDownload(buildTemplateBase64(),XLSX_MIME,TEMPLATE_NAME);
+      setStatus('✓ Templat didownload','ok');
+    }catch(err){
+      setStatus('Gagal mengunduh templat','err');
+    }
   }
 }
 </script>
