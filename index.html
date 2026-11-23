@@ -250,13 +250,14 @@ body { font-family:'Plus Jakarta Sans',sans-serif; background:#0a1929; color:var
 }
 
 /* KARTU */
-.kartu { border:2px solid #000; padding:0; position:relative; overflow:hidden; display:flex; flex-direction:column; min-height:66mm; color:#000; }
+.kartu { background:#fff; border:2px solid #000; padding:0; position:relative; overflow:hidden; display:flex; flex-direction:column; min-height:66mm; color:#000; }
 .kartu * { color:#000 !important; }
 .kartu-bg { position:absolute; top:0; left:0; right:0; bottom:0; z-index:0; background-size:cover; background-position:center; background-repeat:no-repeat; }
-.kartu-watermark { position:absolute; top:0; left:0; right:0; bottom:0; display:flex; flex-direction:column; justify-content:center; overflow:hidden; pointer-events:none; z-index:0; }
+.kartu-watermark { position:absolute; top:0; left:0; right:0; bottom:0; display:flex; flex-direction:column; justify-content:flex-start; overflow:hidden; pointer-events:none; z-index:0; }
 .kartu-watermark.hidden { display:none !important; }
-.kartu-watermark span { color:rgba(0,128,0,0.15) !important; font-size:8.5px; font-weight:bold; white-space:nowrap; line-height:1.6; letter-spacing:0.5px; }
-.kartu-header { display:flex; align-items:center; padding:3mm 3mm 2mm 3mm; border-bottom:1.5px solid #000; background:white; position:relative; z-index:1; gap:6px; }
+.kartu-watermark span { color:rgba(0,128,0,0.15) !important; font-size:8.5px; font-weight:bold; white-space:nowrap; line-height:1.6; letter-spacing:0.5px; flex-shrink:0; }
+.kartu-watermark span:nth-child(even) { margin-left:-40px; }
+.kartu-header { display:flex; align-items:center; padding:3mm 3mm 2mm 3mm; border-bottom:1.5px solid #000; background:transparent; position:relative; z-index:1; gap:6px; }
 .logo-placeholder { width:28px; height:28px; border:1px dashed #ccc; border-radius:4px; display:flex; align-items:center; justify-content:center; font-size:5.5px; color:#888 !important; text-align:center; flex-shrink:0; font-family:'Times New Roman',serif; line-height:1.2; padding:2px; }
 .header-text { flex:1; text-align:center; line-height:1.3; font-family:'Times New Roman',serif; }
 .title-asat   { font-size:7px; font-weight:bold; text-transform:uppercase; }
@@ -269,7 +270,7 @@ body { font-family:'Plus Jakarta Sans',sans-serif; background:#0a1929; color:var
 .ruang-label { font-size:8px; font-weight:bold; margin-right:4px; line-height:22px; font-family:'Times New Roman',serif; }
 .kartu-data { padding:1mm 3mm; flex:1; position:relative; z-index:1; }
 .data-row { display:flex; align-items:baseline; margin-bottom:1.5mm; font-size:8px; font-family:'Times New Roman',serif; }
-.data-label { width:26mm; font-weight:normal; flex-shrink:0; }
+.data-label { width:12.3em; font-weight:normal; flex-shrink:0; }
 .data-colon { width:4mm; flex-shrink:0; text-align:center; }
 .data-value { flex:1; font-weight:normal; border-bottom:0.5px solid #555; min-height:10px; padding-bottom:1px; }
 .kartu-footer { padding:1mm 3mm 2mm 3mm; position:relative; z-index:1; display:flex; justify-content:flex-end; flex-direction:column; align-items:flex-end; }
@@ -303,6 +304,7 @@ body { font-family:'Plus Jakarta Sans',sans-serif; background:#0a1929; color:var
   #placeholder { display:none !important; }
 }
 </style>
+<style id="dynamic-layout-style"></style>
 </head>
 <body>
 
@@ -521,6 +523,29 @@ body { font-family:'Plus Jakarta Sans',sans-serif; background:#0a1929; color:var
       </div>
     </div>
 
+    <!-- SECTION: Ukuran Font & Jarak -->
+    <div class="edit-section">
+      <div class="edit-section-title">Ukuran Font &amp; Jarak Kartu</div>
+      <div class="edit-grid" style="grid-template-columns:1fr;">
+        <div class="range-group">
+          <label style="min-width:130px;">Font Teks Kop</label>
+          <input type="range" id="fsKopRange" min="5" max="12" value="7" step="0.5" oninput="onLayoutChange()">
+          <span class="range-val" id="fsKopVal">7 pt</span>
+        </div>
+        <div class="range-group">
+          <label style="min-width:130px;">Font Biodata Peserta</label>
+          <input type="range" id="fsDataRange" min="6" max="14" value="8" step="0.5" oninput="onLayoutChange()">
+          <span class="range-val" id="fsDataVal">8 pt</span>
+        </div>
+        <div class="range-group">
+          <label style="min-width:130px;">Jarak Antar Kartu</label>
+          <input type="range" id="gapRange" min="0" max="10" value="4" step="0.5" oninput="onLayoutChange()">
+          <span class="range-val" id="gapVal">4 mm</span>
+        </div>
+        <small style="font-size:11px;color:var(--muted);">Jarak 0 mm = kartu berhimpit, garis pembatas menyatu menjadi satu garis (cocok untuk dipotong).</small>
+      </div>
+    </div>
+
     <!-- SECTION: TTD -->
     <div class="edit-section">
       <div class="edit-section-title">Tanda Tangan &amp; Titi Mangsa</div>
@@ -605,6 +630,7 @@ body { font-family:'Plus Jakarta Sans',sans-serif; background:#0a1929; color:var
             <option value="contain">Contain</option>
             <option value="100% 100%">Stretch</option>
             <option value="repeat">Repeat</option>
+            <option value="repeat-small">Repeat Kecil</option>
           </select>
           <button class="btn-sm-danger" onclick="clearBg()">✕ Hapus</button>
         </div>
@@ -802,6 +828,11 @@ function refreshStampInCards(){
 }
 
 /* WATERMARK */
+function buildWmLines(){
+  const t=escHtml(config.watermark)+'&nbsp;&nbsp;&nbsp;'; let h='';
+  for(let i=0;i<40;i++) h+=`<span>${t.repeat(8)}</span>`;
+  return h;
+}
 function toggleWatermark(){
   showWatermark=document.getElementById('edit_showWatermark').checked;
   document.querySelectorAll('.kartu-watermark').forEach(el=>el.classList.toggle('hidden',!showWatermark));
@@ -809,10 +840,8 @@ function toggleWatermark(){
 function applyWatermarkText(){
   const val=document.getElementById('edit_watermark').value.trim();
   config.watermark=val||CONFIG_DEFAULTS.watermark;
-  const wmText=escHtml(config.watermark)+'&nbsp;&nbsp;&nbsp;';
   document.querySelectorAll('.kartu-watermark').forEach(el=>{
-    let html=''; for(let i=0;i<14;i++) html+=`<span>${wmText.repeat(3)}</span>`;
-    el.innerHTML=html; el.classList.toggle('hidden',!showWatermark);
+    el.innerHTML=buildWmLines(); el.classList.toggle('hidden',!showWatermark);
   });
 }
 
@@ -863,8 +892,9 @@ function buildBgStyle(){
   }
   if(bgState.mode==='image'&&bgState.imageSrc){
     const op=(bgState.imageOpacity/100).toFixed(2);
-    const sz=bgState.imageSize==='repeat'?'auto':bgState.imageSize;
-    const rp=bgState.imageSize==='repeat'?'repeat':'no-repeat';
+    const isRep=bgState.imageSize==='repeat'||bgState.imageSize==='repeat-small';
+    const sz=bgState.imageSize==='repeat'?'auto':bgState.imageSize==='repeat-small'?'12mm':bgState.imageSize;
+    const rp=isRep?'repeat':'no-repeat';
     return `background-image:url(${bgState.imageSrc});background-size:${sz};background-repeat:${rp};background-position:center;opacity:${op};`;
   }
   return '';
@@ -872,6 +902,39 @@ function buildBgStyle(){
 function refreshBgInCards(){
   const s=buildBgStyle();
   document.querySelectorAll('.kartu-bg').forEach(el=>{ el.style.cssText=s; });
+}
+
+/* ── UKURAN FONT & JARAK KARTU ── */
+const LAYOUT_DEFAULTS={fsKop:7,fsData:8,gap:4};
+let layout={...LAYOUT_DEFAULTS};
+function applyLayoutStyle(){
+  const k=layout.fsKop,d=layout.fsData,g=layout.gap;
+  let css=`
+.title-asat,.title-tahun{font-size:${k}px !important;}
+.title-sekolah{font-size:${k+0.5}px !important;}
+.kartu-data .data-row{font-size:${d}px !important;}
+.page-a4{gap:${g}mm !important;}`;
+  if(g===0){
+    css+=`
+.page-a4 .kartu:nth-child(even){margin-left:-2px;}
+.page-a4 .kartu:nth-child(n+3){margin-top:-2px;}`;
+  }
+  document.getElementById('dynamic-layout-style').textContent=css;
+}
+function onLayoutChange(){
+  layout.fsKop=parseFloat(document.getElementById('fsKopRange').value);
+  layout.fsData=parseFloat(document.getElementById('fsDataRange').value);
+  layout.gap=parseFloat(document.getElementById('gapRange').value);
+  document.getElementById('fsKopVal').textContent=layout.fsKop+' pt';
+  document.getElementById('fsDataVal').textContent=layout.fsData+' pt';
+  document.getElementById('gapVal').textContent=layout.gap+' mm';
+  applyLayoutStyle();
+}
+function resetLayout(){
+  document.getElementById('fsKopRange').value=LAYOUT_DEFAULTS.fsKop;
+  document.getElementById('fsDataRange').value=LAYOUT_DEFAULTS.fsData;
+  document.getElementById('gapRange').value=LAYOUT_DEFAULTS.gap;
+  onLayoutChange();
 }
 
 /* APPLY/RESET */
@@ -913,6 +976,7 @@ function resetEdits(){
   document.getElementById('stampOffsetRange').value=0; document.getElementById('stampOffsetVal').textContent='0 mm';
   document.getElementById('stampOffsetXRange').value=0; document.getElementById('stampOffsetXVal').textContent='0 mm';
   showWatermark=false; document.getElementById('edit_showWatermark').checked=false;
+  resetLayout();
   clearStamp(); refreshAllCardContent(); setStatus('↺ Reset default');
 }
 function refreshAllCardContent(){
@@ -921,9 +985,7 @@ function refreshAllCardContent(){
   document.querySelectorAll('.slot-tahun-pelajaran').forEach(el=>el.textContent=config.tahunPelajaran);
   document.querySelectorAll('.slot-nama-sekolah-badan').forEach(el=>el.textContent=config.namaSekolahBadan);
   document.querySelectorAll('.kartu-watermark').forEach(el=>{
-    const wmText=escHtml(config.watermark)+'&nbsp;&nbsp;&nbsp;'; let html='';
-    for(let i=0;i<14;i++) html+=`<span>${wmText.repeat(3)}</span>`;
-    el.innerHTML=html; el.classList.toggle('hidden',!showWatermark);
+    el.innerHTML=buildWmLines(); el.classList.toggle('hidden',!showWatermark);
   });
   document.querySelectorAll('.slot-titi-mangsa').forEach(el=>el.textContent=config.tempatTtd+', '+config.tanggalTtd);
   document.querySelectorAll('.slot-jabatan-kepsek').forEach(el=>el.textContent=config.jabatanKepsek);
@@ -1091,8 +1153,7 @@ function buildCard(peserta){
   if(!peserta){ div.style.cssText='background:#f9f9f9;border:1.5px dashed #ccc;'; return div; }
   const ruang=getField(peserta,'ruang'),nama=getField(peserta,'nama'),kelas=getField(peserta,'kelas');
   const nis=getField(peserta,'nis_nisn','nis','nisn','nis__nisn'),nop=getField(peserta,'no_peserta','nomor_peserta');
-  const wmText=escHtml(config.watermark)+'&nbsp;&nbsp;&nbsp;'; let wmLines='';
-  for(let i=0;i<14;i++) wmLines+=`<span>${wmText.repeat(3)}</span>`;
+  const wmLines=buildWmLines();
 
   const logoKabHtml = logoKabSrc
     ? `<img src="${logoKabSrc}" style="width:${logoKabSizePx}px;height:${logoKabSizePx}px;object-fit:contain;display:block;">`
